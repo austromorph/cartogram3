@@ -1,8 +1,8 @@
 [general]
-name=Cartogram
+name=cartogram3
 qgisMinimumVersion=2.99
 description=Generate anamorphic maps
-version=2.99
+version=2.99.1
 author=Christoph Fink
 email=morph@austromorph.space
 

@@ -41,6 +41,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QProgressBar
 )
+from PyQt5.QtXml import (
+    QDomDocument
+)
 
 from qgis.core import (
     QgsMapLayer,
@@ -104,12 +107,8 @@ class Cartogram:
             self.validateInputs
         )
 
-        # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&cartogram3')
-
-        self.toolbar = self.iface.addToolBar(u'Compute cartogram')
-        self.toolbar.setObjectName(u'cartogram3')
+        self.menu = self.tr("&Cartogram")
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -203,18 +202,28 @@ class Cartogram:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = os.path.join(self.plugin_dir, 'icon.png')
+        self.toolbar = self.iface.addToolBar("Compute cartogram")
+        self.toolbar.setObjectName("Cartogram")
+
+        icon_path = os.path.join(self.plugin_dir, "icon.png")
         self.add_action(
             icon_path,
-            text=self.tr(u'Compute cartogram'),
+            text=self.tr("Compute cartogram"),
             callback=self.run,
+            parent=self.iface.mainWindow())
+
+        self.add_action(
+            None,
+            text=self.tr("Add sample dataset"),
+            callback=self.addSampleDataset,
+            add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.tr(u'&Cartogram'),
+                self.menu,
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -265,10 +274,34 @@ class Cartogram:
                 if layer.type() == QgsMapLayer.VectorLayer and
                 layer.geometryType() == QgsWkbTypes.PolygonGeometry]
         ) < 1:
-            self.iface.messageBar().pushCritical(
-                self.tr("Error"),
+            # otherwise display an error message and offer to add
+            # a sample dataset
+            errorMessageLabel = QLabel(
                 self.tr("You need at least one polygon vector layer " +
                         "to create a cartogram.")
+            )
+            errorMessageLabel.setAlignment(
+                Qt.AlignLeft | Qt.AlignVCenter
+            )
+            addSampleDatasetButton = QPushButton(
+                self.tr("Add sample dataset")
+            )
+            addSampleDatasetButton.clicked.connect(
+                self.addSampleDataset
+            )
+
+            self.messageBarItem = self.iface.messageBar().createMessage(
+                self.tr("Error")
+            )
+            for widget in [
+                errorMessageLabel,
+                addSampleDatasetButton
+            ]:
+                self.messageBarItem.layout().addWidget(widget)
+
+            self.iface.messageBar().pushWidget(
+                self.messageBarItem,
+                QgsMessageBar.CRITICAL
             )
             return False
 
@@ -296,6 +329,10 @@ class Cartogram:
                 "cartogram base",
                 self.inputLayer
             )
+
+            # remember the input layer’s style
+            self.inputLayerStyle = QDomDocument()
+            self.inputLayer.exportNamedStyle(self.inputLayerStyle, "")
 
             # which fields to process on
             self.jobs = queue.Queue()
@@ -410,6 +447,19 @@ class Cartogram:
 
         # add output layer to qgis project
         if layer is not None:
+            # try to update the style xml before applying it,
+            # hide input layer
+            try:
+                self.inputLayer.exportNamedStyle(self.inputLayerStyle, "")
+                QgsProject.instance().layerTreeRoot() \
+                    .findLayer(self.inputLayer) \
+                    .setItemVisibilityChecked(False)
+            except Exception as e:
+                QgsMessageLog.logMessage(repr(e))
+                pass
+            layer.importNamedStyle(self.inputLayerStyle)
+
+            # add the layer to the project
             QgsProject.instance().addMapLayer(layer)
 
             avgError -= 1
@@ -447,3 +497,52 @@ class Cartogram:
         # empty the job queue
         self.jobs = queue.Queue()
         self.workerFinished()
+
+    def addSampleDataset(self):
+        try:
+            self.iface.messageBar().popWidget(
+                self.messageBarItem
+            )
+        except:
+            pass
+
+        sampleDataset = QgsVectorLayer(
+            os.path.join(
+                self.plugin_dir,
+                "data",
+                "Austria_PopulationByNUTS2.gml"
+            ),
+            ""
+        )
+
+        sampleLayer = self.createMemoryLayer(
+            "Austria_Population_NUTS2_20170101",
+            sampleDataset
+        )
+
+        sampleLayer.loadNamedStyle(
+            os.path.join(
+                self.plugin_dir,
+                "data",
+                "Austria_PopulationByNUTS2.qml"
+            )
+        )
+
+        sampleLayer.setTitle(
+                "Austria: Population by NUTS2 regions, 1 Jan 2017")
+        sampleLayer.setShortName("Austria_Population_NUTS2_20170101")
+        sampleLayer.setAbstract(
+            "Austria’s population by NUTS2 region, as of 1 Jan 2017 \n" +
+            "\n" +
+            "Data sources: \n" +
+            "    http://ec.europa.eu/eurostat/web/gisco/geodata/" +
+            "reference-data/administrative-units-statistical-units/" +
+            "nuts#nuts13 \n" +
+            "    http://www.statistik.at/web_de/statistiken/" +
+            "menschen_und_gesellschaft/bevoelkerung/" +
+            "bevoelkerungsstand_und_veraenderung/" +
+            "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
+        )
+
+        QgsProject.instance().addMapLayer(sampleLayer)
+        del sampleDataset
