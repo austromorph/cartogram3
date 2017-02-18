@@ -90,7 +90,7 @@ class CartogramWorker(QObject):
                     break
 
                 self.status.emit(
-		    self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
+                    self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
                         i=iterations,
                         mI=self.maxIterations,
                         fN=self.fieldName

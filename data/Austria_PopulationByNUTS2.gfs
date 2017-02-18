@@ -1,0 +1,32 @@
+<GMLFeatureClassList>
+  <GMLFeatureClass>
+    <Name>Austria_PopulationByNUTS2</Name>
+    <ElementPath>Austria_PopulationByNUTS2</ElementPath>
+    <!--MULTIPOLYGON-->
+    <GeometryType>6</GeometryType>
+    <SRSName>EPSG:31287</SRSName>
+    <DatasetSpecificInfo>
+      <FeatureCount>9</FeatureCount>
+      <ExtentXMin>112518.16700</ExtentXMin>
+      <ExtentXMax>685443.97400</ExtentXMax>
+      <ExtentYMin>275472.02000</ExtentYMin>
+      <ExtentYMax>570430.82100</ExtentYMax>
+    </DatasetSpecificInfo>
+    <PropertyDefn>
+      <Name>nuts2</Name>
+      <ElementPath>nuts2</ElementPath>
+      <Type>String</Type>
+      <Width>4</Width>
+    </PropertyDefn>
+    <PropertyDefn>
+      <Name>pop2017010</Name>
+      <ElementPath>pop2017010</ElementPath>
+      <Type>Integer</Type>
+    </PropertyDefn>
+    <PropertyDefn>
+      <Name>area_km2</Name>
+      <ElementPath>area_km2</ElementPath>
+      <Type>Real</Type>
+    </PropertyDefn>
+  </GMLFeatureClass>
+</GMLFeatureClassList>
