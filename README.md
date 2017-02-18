@@ -27,7 +27,6 @@ Usage
   ![Cartogram of the population of Austria by NUTS2 regions](data/Austria_PopulationCartogram_NUTS2_20170101.png)
 
 <sup id="footnote-1">1)</sup> </a>Why an absolute count of a variable? Quote from the [worldmapper.org FAQ](http://www.worldmapper.org/faq.html):
-
 > Q. Why don't you have a map of population density or births per thousand? 
 > A. The maps are best understood as pie charts where the segment of the pie is reshaped to look like a country.  Then the area of that country is adjusted according to the proportion of the world total of a variable that is found there.  Just as a pie chart would.  As such, we can only map counts or totals.  We cannot map rates because they are not additive, that is to say that they do not add up to a meaningful total.  To return to the pie chart analogy, you would not draw a pie chart of population density but one of total population.
 
@@ -47,7 +46,6 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 Sample data
 -----------
 
@@ -55,4 +53,3 @@ The supplied sample dataset is combined from two data sources:
 
 * Administrative boundaries: [(c) 2013 EuroGeographics](http://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/administrative-units-statistical-units/nuts#nuts13)
 * Population numbers: [(c) 2017 Statistik Austria](http://www.statistik.at/web_de/statistiken/menschen_und_gesellschaft/bevoelkerung/bevoelkerungsstand_und_veraenderung/bevoelkerung_zu_jahres-_quartalsanfang/index.html)
-
