@@ -1,6 +1,6 @@
 [general]
 name=cartogram3
-qgisMinimumVersion=2.99
+qgisMinimumVersion=3.0
 description=Generate anamorphic maps
 version=2.99.1
 author=Christoph Fink
