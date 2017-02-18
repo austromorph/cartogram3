@@ -21,7 +21,7 @@ cd "${pluginDir}"/..
 
 zip \
 	-9 \
-	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "$0")" \
+	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "${pluginDir}")/$(basename "$0")" \
 	-r \
 	"${outputDir}/${pluginName}-${pluginVersion}.zip" \
  	"$(basename "${pluginDir}")"
