@@ -1,0 +1,25 @@
+[general]
+name=Cartogram
+qgisMinimumVersion=2.99
+description=Generate anamorphic maps
+version=2.99
+author=Christoph Fink
+email=morph@austromorph.space
+
+about=This plugin creates continous cartograms (a.k.a. anamorphic maps) from polygon layers.
+
+tracker=https://github.com/austromorph/cartogram3/issues
+repository=https://github.com/austromorph/cartogram3
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+tags=geometry, layers, polygon, shapefile
+
+homepage=geometry, layers, polygon, shapefile
+category=Vector
+icon=icon.png
+
+experimental=False
+deprecated=False
+
