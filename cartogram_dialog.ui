@@ -120,7 +120,7 @@
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgsmaplayercombobox.h</header>
+   <header>cartogram3.qgsMapLayerComboBox</header>
   </customwidget>
   <customwidget>
    <class>QgsFieldListView</class>

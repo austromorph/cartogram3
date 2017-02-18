@@ -56,6 +56,7 @@ class QgsFieldListView(QListView):
     def allowEmptyFieldName(self):
         return self.mFieldProxyModel.sourceFieldModel().allowEmptyFieldName()
 
+    @pyqtSlot("QgsMapLayer*")
     def setLayer(self, layer):
         self.mFieldProxyModel.sourceFieldModel().setLayer(layer)
         self.selectionModel().clearSelection()
