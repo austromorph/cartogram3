@@ -31,5 +31,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from .cartogram import Cartogram
+    from .cartogram3 import Cartogram
     return Cartogram(iface)
