@@ -35,8 +35,8 @@
     </message>
     <message>
         <location filename="../cartogram3.py" line="466"/>
-        <source>cartogram3 successfully finished computing a cartogram for field ‘{fieldName}’ after {iterations} iterations with {avgError:.2%} average error remaining.</source>
-        <translation>cartogram3 succesfuldt afsluttet beregne en cartogram for felt ‚{fieldName}‘ efter {iterations} iterationer med en gennemsnitlig fejl af {avgError:.2%} tilbage.</translation>
+        <source>cartogram3 successfully finished computing a cartogram for field ‘{fieldName}’ after {iterations} iterations with {avgError:.2n}% average error remaining.</source>
+        <translation>cartogram3 succesfuldt afsluttet beregne en cartogram for felt ‚{fieldName}‘ efter {iterations} iterationer med en gennemsnitlig fejl af {avgError:.2n}% tilbage.</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="477"/>

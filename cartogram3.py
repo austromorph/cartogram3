@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 import os.path
+import locale
 import queue
 
 from PyQt5.QtCore import (
@@ -78,11 +79,11 @@ class Cartogram:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        userLocale = QSettings().value('locale/userLocale')[0:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'cartogram3_{}.qm'.format(locale))
+            'cartogram3_{}.qm'.format(userLocale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -90,6 +91,12 @@ class Cartogram:
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
+        
+        try:
+            locale.setlocale(locale.LC_ALL, 
+                QSettings().value('locale/userLocale'))
+        except:
+            pass
 
         # Create the dialog (after translation) and keep reference
         self.dialog = CartogramDialog()
@@ -466,10 +473,10 @@ class Cartogram:
             QgsMessageLog.logMessage(
                 self.tr("cartogram3 successfully finished computing a " +
                         "cartogram for field ‘{fieldName}’ after " +
-                        "{iterations} iterations with {avgError:.2%} " +
+                        "{iterations} iterations with {avgError:.2n}% " +
                         "average error remaining.").format(
                             iterations=iterations,
-                            avgError=avgError,
+                            avgError=avgError * 100,
                             fieldName=fieldName
                 )
             )
