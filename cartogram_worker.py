@@ -14,6 +14,7 @@
 """
 import math
 import multiprocessing
+import re
 import traceback
 
 from PyQt5.QtCore import (
@@ -22,7 +23,8 @@ from PyQt5.QtCore import (
 )
 
 from qgis.core import (
-    QgsGeometry
+    QgsGeometry,
+    QgsMessageLog
 )
 
 
@@ -60,8 +62,6 @@ class CartogramWorker(QObject):
 
             iterations = 0
             while True:
-                iterations += 1
-
                 # did the user click the cancel button?
                 if self.stopped:
                     self.finished.emit(None, "", 0, 0.0)
@@ -88,6 +88,10 @@ class CartogramWorker(QObject):
                     )
                     # and finally, break out of the loop
                     break
+
+                # we got until here? well then let’s take this baby
+                # for another round
+                iterations += 1
 
                 self.status.emit(
                     self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
@@ -147,6 +151,7 @@ class CartogramWorker(QObject):
 
         for feature in self.layer.getFeatures():
             inQueue.put((feature.id(), feature.geometry().exportToWkt()), True)
+            #QgsMessageLog.logMessage(feature.geometry().exportToWkt())
 
         for i in range(numThreads):
             inQueue.put((None, None))
@@ -187,6 +192,8 @@ class CartogramWorker(QObject):
                 else:
                     continue
 
+            #QgsMessageLog.logMessage(geometry)
+
             self.layer.dataProvider().changeGeometryValues({
                 featureId: QgsGeometry().fromWkt(geometry)
             })
@@ -200,34 +207,64 @@ class CartogramWorker(QObject):
                 outQueue.put((None, None))
                 break
 
-            geometry = QgsGeometry().fromWkt(geometry)
+            #geometry = QgsGeometry().fromWkt(geometry)
 
-            if geometry.isMultipart():
-                geometry = QgsGeometry().fromMultiPolygon([
-                    self.transformPolygon(polygon)
-                    for polygon in geometry.asMultiPolygon()
-                ])
+            #if geometry.isMultipart():
+            #    geometry = QgsGeometry().fromMultiPolygon([
+            #        self.transformPolygon(polygon)
+            #        for polygon in geometry.asMultiPolygon()
+            #    ])
+            #else:
+            #    geometry = QgsGeometry().fromPolygon(
+            #        self.transformPolygon(
+            #            geometry.asPolygon()
+            #        )
+            #    )
+
+            # parse wkt directly:
+            # a) might be faster (no conversions, Queue requires easy format)
+            # b) not affected by http://hub.qgis.org/issues/16198
+
+            # for the sake of performance we assume that
+            # QgsGeometry.exportToWkt() returns 
+            # well-formed WKT strings
+
+            geometryType = geometry[:geometry.index("(")-1]
+            geometry = geometry[len(geometryType)+1:]
+
+            if geometryType == "MultiPolygon":
+                polygons = geometry[3:-3].split(")),((")
             else:
-                geometry = QgsGeometry().fromPolygon(
-                    self.transformPolygon(
-                        geometry.asPolygon()
-                    )
+                polygons = [geometry[3:-3]]
+
+            polygons = ")),((".join(
+                self.transformPolygon(polygon) for polygon in polygons
+            )
+
+            geometry = \
+                "{geometryType} ((({polygons})))".format(
+                    geometryType=geometryType,
+                    polygons=polygons
                 )
 
-            outQueue.put((featureId, geometry.exportToWkt()))
+            outQueue.put((featureId, geometry))
 
     def transformPolygon(self, polygon):
-        return [self.transformLine(line) for line in polygon]
+        lineStrings = polygon.split("),(")
+        return "),(".join(self.transformLine(line) for line in lineStrings)
 
     def transformLine(self, line):
-        return [self.transformPoint(point) for point in line]
+        points = line.split(",")
+        return ",".join(self.transformPoint(point) for point in points)
 
     def transformPoint(self, point):
         metaFeatures = self.metaFeatures
         reductionFactor = self.reductionFactor
+ 
+        (x0, y0) = point.strip().split(" ")
 
-        x = x0 = point.x()
-        y = y0 = point.y()
+        x = x0 = float(x0)
+        y = y0 = float(y0)
 
         # calculate the influence of all polygons on this point
         for metaFeature in metaFeatures:
@@ -251,8 +288,7 @@ class CartogramWorker(QObject):
             x += (x0 - cx) * force
             y += (y0 - cy) * force
 
-        point.setX(x)
-        point.setY(y)
+        point = "{} {}".format(x,y)
         return point
 
 
