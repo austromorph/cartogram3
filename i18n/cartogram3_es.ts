@@ -35,7 +35,7 @@
     </message>
     <message>
         <location filename="../cartogram3.py" line="466"/>
-        <source>cartogram3 successfully finished computing a cartogram for field â{fieldName}â after {iterations} iterations with {avgError:.2%} average error remaining.</source>
+	<source>cartogram3 successfully finished computing a cartogram for field ‘{fieldName}’ after {iterations} iterations with {avgError:.2%} average error remaining.</source>
         <translation>cartogram3: Se terminó con exito la computación de un cartograma por el atributo «{fieldName}». Después {iterations} iteraciónes se queda un error promedio de {avgError:.2%}.</translation>
     </message>
     <message>
@@ -45,7 +45,7 @@
     </message>
     <message>
         <location filename="../cartogram3.py" line="485"/>
-        <source>An error occurred during cartogram creation. Please see the âPluginsâ section of the message log for details.</source>
+        <source>An error occurred during cartogram creation. Please see the ‘Plugins’ section of the message log for details.</source>
         <translation>Ocurrió un error al ejecutar la computación.</translation>
     </message>
     <message>

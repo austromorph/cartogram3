@@ -35,7 +35,7 @@
     </message>
     <message>
         <location filename="../cartogram3.py" line="466"/>
-        <source>cartogram3 successfully finished computing a cartogram for field â{fieldName}â after {iterations} iterations with {avgError:.2%} average error remaining.</source>
+        <source>cartogram3 successfully finished computing a cartogram for field ‘{fieldName}’ after {iterations} iterations with {avgError:.2%} average error remaining.</source>
         <translation>cartogram3 succesfuldt afsluttet beregne en cartogram for felt ‚{fieldName}‘ efter {iterations} iterationer med en gennemsnitlig fejl af {avgError:.2%} tilbage.</translation>
     </message>
     <message>
@@ -45,7 +45,7 @@
     </message>
     <message>
         <location filename="../cartogram3.py" line="485"/>
-        <source>An error occurred during cartogram creation. Please see the âPluginsâ section of the message log for details.</source>
+        <source>An error occurred during cartogram creation. Please see the ‘Plugins’ section of the message log for details.</source>
         <translation>Der opstod en fejl. Se venligst &amp;quot;Plugin&amp;quot;-loggen for flere detaljer.</translation>
     </message>
     <message>
