@@ -9,8 +9,6 @@ As its successors, this plugin implements the algorithm proposed by:
 
 > Dougenik, J. A, N. R. Chrisman, and D. R. Niemeyer. 1985. "[An algorithm to construct continuous cartograms.](http://www.tandfonline.com/doi/abs/10.1111/j.0033-0124.1985.00075.x)" Professional Geographer 37:75-81 
 
-More detailed documention is to be written, in the meantime please refer to the [QGIS 2-Plugin’s documentation](https://github.com/informeren/qgis-cartogram/blob/develop/README.md).
-
 Usage
 -----
 
