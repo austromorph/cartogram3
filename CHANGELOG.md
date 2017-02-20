@@ -7,4 +7,4 @@ Change Log
 	* added sample data
 	* added German, Spanish & Danish translation
 * __2.99.0:__ (2017-02-17):
-	*initial release
+	* initial release
