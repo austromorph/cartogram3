@@ -302,8 +302,12 @@ class CartogramMetaFeature(object):
     def __init__(self, geometry, value, minValue):
 
         self.area = geometry.area()
-        self.value = value
         self.radius = math.sqrt(self.area / math.pi)
+
+        if value > 0:
+            self.value = value
+        else:
+            self.value = minValue
 
         centroid = geometry.centroid().asPoint()
         (self.cx, self.cy) = (centroid.x(), centroid.y())
