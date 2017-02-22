@@ -15,6 +15,7 @@
 import math
 import multiprocessing
 import os
+import pickle
 import platform
 import sys
 import traceback
@@ -26,6 +27,7 @@ from PyQt5.QtCore import (
 
 from qgis.core import (
     QgsGeometry,
+    QgsMessageLog,
     QgsVertexId
 )
 
@@ -154,16 +156,17 @@ class CartogramWorker(QObject):
 
     def transformFeatures(self):
         self.layer.dataProvider().changeGeometryValues({
-            feature.id(): self.transformGeometry(
-                QgsGeometry(feature.geometry())
+            feature.id(): QgsGeometry(
+                self.transformGeometry(feature.geometry().geometry().clone())
             )
             for feature in self.layer.getFeatures()
         })
 
-    def transformGeometry(self, geometry):
+    def transformGeometry(self, abstractGeometry):
         if self.stopped:
-            return geometry
-        abstractGeometry = geometry.geometry().clone()
+            return abstractGeometry
+        QgsMessageLog.logMessage(repr(pickle.dumps(abstractGeometry)))
+        #abstractGeometry = geometry.geometry().clone()
         for p in range(abstractGeometry.partCount()):
             for r in range(abstractGeometry.ringCount(p)):
                 for v in range(abstractGeometry.vertexCount(p, r) - 1):
@@ -179,7 +182,8 @@ class CartogramWorker(QObject):
                     point = self.transformPoint(point)
                     abstractGeometry.moveVertex(vertexId, point)
         self.progress.emit(1)
-        return QgsGeometry(abstractGeometry)
+        return abstractGeometry
+        #return QgsGeometry(abstractGeometry)
 
     def transformPoint(self, point):
         x = x0 = point.x()
