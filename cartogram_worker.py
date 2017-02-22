@@ -25,7 +25,8 @@ from PyQt5.QtCore import (
 )
 
 from qgis.core import (
-    QgsGeometry
+    QgsGeometry,
+    QgsVertexId
 )
 
 if platform.system() == "Windows":
@@ -152,150 +153,63 @@ class CartogramWorker(QObject):
         return metaFeature.sizeError
 
     def transformFeatures(self):
-        numThreads = multiprocessing.cpu_count() + 1
-        inQueue = multiprocessing.Queue()
-        outQueue = multiprocessing.Queue()
-
-        for feature in self.layer.getFeatures():
-            inQueue.put(
-                (feature.id(), feature.geometry().exportToWkt()),
-                True
+        self.layer.dataProvider().changeGeometryValues({
+            feature.id(): self.transformGeometry(
+                QgsGeometry(feature.geometry())
             )
+            for feature in self.layer.getFeatures()
+        })
 
-        for i in range(numThreads):
-            inQueue.put((None, None))
+    def transformGeometry(self, geometry):
+        if self.stopped:
+            return geometry
+        abstractGeometry = geometry.geometry().clone()
+        for p in range(abstractGeometry.partCount()):
+            for r in range(abstractGeometry.ringCount(p)):
+                for v in range(abstractGeometry.vertexCount(p, r) - 1):
+                    # -1 because the last one is the first one again
+                    vertexId = QgsVertexId(p, r, v, QgsVertexId.SegmentVertex)
+                    if not vertexId.isValid():
+                        vertexId = QgsVertexId(
+                            p, r, v, QgsVertexId.CurveVertex
+                        )
+                        if not vertexId.isValid():
+                            continue
+                    point = abstractGeometry.vertexAt(vertexId)
+                    point = self.transformPoint(point)
+                    abstractGeometry.moveVertex(vertexId, point)
+        self.progress.emit(1)
+        return QgsGeometry(abstractGeometry)
 
-        threads = []
-        for i in range(numThreads):
-            p = multiprocessing.Process(
-                target=transformFeature,
-                args=(
-                    inQueue,
-                    outQueue,
-                    self.metaFeatures,
-                    self.reductionFactor
-                )
-            )
-            p.start()
-            threads.append(p)
+    def transformPoint(self, point):
+        x = x0 = point.x()
+        y = y0 = point.y()
 
-        while True:
-            if self.stopped:
-                # clear inQueue
-                while True:
-                    (featureId, geometry) = inQueue.get(True)
-                    if featureId is None:
-                        break
+        # calculate the influence of all polygons on this point
+        for metaFeature in self.metaFeatures:
+            if metaFeature.mass == 0:
+                continue
 
-                # put some more death pills so everybody gets one
-                for i in range(numThreads):
-                    inQueue.put((None, None))
+            cx = metaFeature.cx
+            cy = metaFeature.cy
+            distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
 
-                # wait for the children to die
-                for p in threads:
-                    p.join()
+            if distance > metaFeature.radius:
+                # force on points ‘far away’ from the centroid
+                force = metaFeature.mass * metaFeature.radius / distance
+            else:
+                # force on points close to the centroid
+                dr = distance / metaFeature.radius
+                force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
 
-                # give up ourselves (main thread)
-                break
+            force *= self.reductionFactor / distance
 
-            (featureId, geometry) = outQueue.get(True)
-            if featureId is None:
-                numThreads -= 1
-                if numThreads == 0:
-                    break
-                else:
-                    continue
+            x += (x0 - cx) * force
+            y += (y0 - cy) * force
 
-            self.layer.dataProvider().changeGeometryValues({
-                featureId: QgsGeometry().fromWkt(geometry)
-            })
-            self.progress.emit(1)
-        self.layer.reload()
-
-
-# the worker functions have to be outside of the class,
-# otherwise multiprocessing cannot pickle them on Windows platforms
-def transformFeature(inQueue, outQueue, metaFeatures, reductionFactor):
-    while True:
-        (featureId, geometry) = inQueue.get(True)
-        if featureId is None:
-            outQueue.put((None, None))
-            break
-
-        # parse wkt directly: (wkb even better?)
-        # a) might be faster (no conversions, Queue requires easy format)
-        # b) not affected by http://hub.qgis.org/issues/16198
-
-        # for the sake of performance we assume that
-        # QgsGeometry.exportToWkt() returns
-        # well-formed WKT strings
-
-        geometryType = geometry[:geometry.index("(")-1]
-        geometry = geometry[len(geometryType)+1:]
-
-        if geometryType == "MultiPolygon":
-            polygons = geometry[3:-3].split(")),((")
-        else:
-            polygons = [geometry[3:-3]]
-
-        polygons = ")),((".join(
-            transformPolygon(polygon, metaFeatures, reductionFactor)
-            for polygon in polygons
-        )
-
-        geometry = \
-            "{geometryType} ((({polygons})))".format(
-                geometryType=geometryType,
-                polygons=polygons
-            )
-        outQueue.put((featureId, geometry))
-
-
-def transformPolygon(polygon, metaFeatures, reductionFactor):
-    lineStrings = polygon.split("),(")
-    return "),(".join(
-        transformLine(line, metaFeatures, reductionFactor)
-        for line in lineStrings
-    )
-
-
-def transformLine(line, metaFeatures, reductionFactor):
-    points = line.split(",")
-    return ",".join(
-        transformPoint(point, metaFeatures, reductionFactor)
-        for point in points
-    )
-
-
-def transformPoint(point, metaFeatures, reductionFactor):
-    (x0, y0) = point.strip().split(" ")
-    x = x0 = float(x0)
-    y = y0 = float(y0)
-
-    # calculate the influence of all polygons on this point
-    for metaFeature in metaFeatures:
-        if metaFeature.mass == 0:
-            continue
-
-        cx = metaFeature.cx
-        cy = metaFeature.cy
-        distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
-
-        if distance > metaFeature.radius:
-            # force on points ‘far away’ from the centroid
-            force = metaFeature.mass * metaFeature.radius / distance
-        else:
-            # force on points close to the centroid
-            dr = distance / metaFeature.radius
-            force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
-
-        force *= reductionFactor / distance
-
-        x += (x0 - cx) * force
-        y += (y0 - cy) * force
-
-    point = "{} {}".format(x, y)
-    return point
+        point.setX(x)
+        point.setY(y)
+        return point
 
 
 class CartogramMetaFeature(object):
