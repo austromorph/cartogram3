@@ -1,6 +1,6 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis simplifyDrawingHints="1" version="2.99.0-Master" readOnly="0" maximumScale="1e+8" simplifyLocal="1" simplifyMaxScale="1" minimumScale="0" simplifyDrawingTol="1" hasScaleBasedVisibilityFlag="0" simplifyAlgorithm="0">
-  <renderer-v2 forceraster="0" symbollevels="0" enableorderby="0" graduatedMethod="GraduatedColor" attr="to_int(&quot;pop2017010&quot; / &quot;area_km2&quot;)" type="graduatedSymbol">
+  <renderer-v2 forceraster="0" symbollevels="0" enableorderby="0" graduatedMethod="GraduatedColor" attr="to_int(&quot;pop20170101&quot; / &quot;area_km2&quot;)" type="graduatedSymbol">
     <ranges>
       <range upper="60.000000000000000" symbol="0" lower="0.000000000000000" label=" &lt; 60" render="true"/>
       <range upper="80.000000000000000" symbol="1" lower="60.000000000000000" label=" 60-80" render="true"/>
@@ -165,7 +165,7 @@
     <property key="labeling/distMapUnitScale" value="0,0,0,0,0,0"/>
     <property key="labeling/drawLabels" value="true"/>
     <property key="labeling/enabled" value="true"/>
-    <property key="labeling/fieldName" value="format_number(&quot;pop2017010&quot; / &quot;area_km2&quot;, 1) || '/km²'"/>
+    <property key="labeling/fieldName" value="format_number(&quot;pop20170101&quot; / &quot;area_km2&quot;, 1) || '/km²'"/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
     <property key="labeling/fontFamily" value="Cantarell"/>
@@ -331,7 +331,7 @@
         </config>
       </editWidget>
     </field>
-    <field name="pop2017010">
+    <field name="pop20170101">
       <editWidget type="TextEdit">
         <config>
           <Option/>
@@ -350,7 +350,7 @@
   <aliases>
     <alias name="" field="fid" index="0"/>
     <alias name="" field="nuts2" index="1"/>
-    <alias name="" field="pop2017010" index="2"/>
+    <alias name="" field="pop20170101" index="2"/>
     <alias name="" field="area_km2" index="3"/>
   </aliases>
   <excludeAttributesWMS/>
@@ -358,19 +358,19 @@
   <defaults>
     <default field="fid" expression=""/>
     <default field="nuts2" expression=""/>
-    <default field="pop2017010" expression=""/>
+    <default field="pop20170101" expression=""/>
     <default field="area_km2" expression=""/>
   </defaults>
   <constraints>
     <constraint field="fid" constraints="1" unique_strength="0" notnull_strength="1" exp_strength="0"/>
     <constraint field="nuts2" constraints="0" unique_strength="0" notnull_strength="0" exp_strength="0"/>
-    <constraint field="pop2017010" constraints="0" unique_strength="0" notnull_strength="0" exp_strength="0"/>
+    <constraint field="pop20170101" constraints="0" unique_strength="0" notnull_strength="0" exp_strength="0"/>
     <constraint field="area_km2" constraints="0" unique_strength="0" notnull_strength="0" exp_strength="0"/>
   </constraints>
   <constraintExpressions>
     <constraint exp="" field="fid" desc=""/>
     <constraint exp="" field="nuts2" desc=""/>
-    <constraint exp="" field="pop2017010" desc=""/>
+    <constraint exp="" field="pop20170101" desc=""/>
     <constraint exp="" field="area_km2" desc=""/>
   </constraintExpressions>
   <attributeactions>
@@ -381,7 +381,7 @@
       <column name="fid" hidden="0" width="-1" type="field"/>
       <column name="nuts2" hidden="0" width="-1" type="field"/>
       <column hidden="1" width="-1" type="actions"/>
-      <column name="pop2017010" hidden="0" width="-1" type="field"/>
+      <column name="pop20170101" hidden="0" width="-1" type="field"/>
       <column name="area_km2" hidden="0" width="-1" type="field"/>
     </columns>
   </attributetableconfig>

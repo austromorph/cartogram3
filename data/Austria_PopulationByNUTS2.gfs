@@ -19,8 +19,8 @@
       <Width>4</Width>
     </PropertyDefn>
     <PropertyDefn>
-      <Name>pop2017010</Name>
-      <ElementPath>pop2017010</ElementPath>
+      <Name>pop20170101</Name>
+      <ElementPath>pop20170101</ElementPath>
       <Type>Integer</Type>
     </PropertyDefn>
     <PropertyDefn>
