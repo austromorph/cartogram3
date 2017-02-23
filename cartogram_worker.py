@@ -27,7 +27,6 @@ from PyQt5.QtCore import (
 
 from qgis.core import (
     QgsGeometry,
-    QgsMessageLog,
     QgsVertexId
 )
 
@@ -165,7 +164,6 @@ class CartogramWorker(QObject):
     def transformGeometry(self, abstractGeometry):
         if self.stopped:
             return abstractGeometry
-        QgsMessageLog.logMessage(repr(pickle.dumps(abstractGeometry)))
         #abstractGeometry = geometry.geometry().clone()
         for p in range(abstractGeometry.partCount()):
             for r in range(abstractGeometry.ringCount(p)):
