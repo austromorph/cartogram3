@@ -12,6 +12,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import functools
 import math
 import multiprocessing
 import os
@@ -26,9 +27,14 @@ from PyQt5.QtCore import (
 )
 
 from qgis.core import (
+    QgsAbstractGeometry,
+    QgsConstWkbPtr,
     QgsGeometry,
     QgsMessageLog,
-    QgsVertexId
+    QgsMultiPolygonV2,
+    QgsPolygonV2,
+    QgsVertexId,
+    QgsWkbTypes
 )
 
 if platform.system() == "Windows":
@@ -53,6 +59,12 @@ class CartogramWorker(QObject):
         self.maxAverageError = maxAverageError
         self.tr = tr
 
+        # remember whether we deal with a MultiGeometry:
+        self.isMulti = QgsWkbTypes.isMultiType(layer.dataProvider().wkbType())
+
+        # find the min value > 0 and set all 
+        # values <= 0 to 1/100 of it
+        # (algorithm cannot deal with 0-values
         self.minValue = min([
             feature[fieldName]
             for feature in layer.getFeatures()
@@ -155,18 +167,75 @@ class CartogramWorker(QObject):
         return metaFeature.sizeError
 
     def transformFeatures(self):
-        self.layer.dataProvider().changeGeometryValues({
-            feature.id(): QgsGeometry(
-                self.transformGeometry(feature.geometry().geometry().clone())
-            )
-            for feature in self.layer.getFeatures()
-        })
+        #self.layer.dataProvider().changeGeometryValues({
+        #    feature.id(): QgsGeometry(
+        #        self.transformGeometry(
+        #            feature.geometry().geometry().clone().asWkb()
+        #            if self.passGeometryAsWkb
+        #            else feature.geometry().geometry().clone()
+        #        )
+        #    )
+        #    for feature in self.layer.getFeatures()
+        #})
+        #_transformGeometry = functools.partial(
+        #    transformGeometry,
+        #    self.metaFeatures,
+        #    self.reductionFactor,
+        #    self.passGeometryAsWkb
+        #)
 
-    def transformGeometry(self, abstractGeometry):
-        if self.stopped:
-            return abstractGeometry
-        QgsMessageLog.logMessage(repr(pickle.dumps(abstractGeometry)))
-        #abstractGeometry = geometry.geometry().clone()
+        #for feature in self.layer.getFeatures():
+        #    rV = functools.partial(
+        #        transformGeometry,
+        #        self.metaFeatures,
+        #        self.reductionFactor,
+        #        self.passGeometryAsWkb
+        #    )((feature.id(),feature.geometry().geometry().clone()))
+        #    QgsMessageLog.logMessage(repr(rV))
+
+        _transformGeometry = functools.partial(
+            transformGeometry,
+            self.metaFeatures,
+            self.reductionFactor,
+            self.isMulti
+        )
+
+        features = [(feature.id(),feature.geometry().geometry().asWkb()) for feature in self.layer.getFeatures()]
+        newFeatures = {}
+
+        with multiprocessing.Pool() as p:
+            for (featureId, wkb) in p.imap_unordered(
+                _transformGeometry,
+                features
+            ):
+                geometry = QgsGeometry()
+                geometry.fromWkb(wkb)
+                newFeatures[featureId]=geometry
+                QgsMessageLog.logMessage(".")
+
+        self.layer.dataProvider().changeGeometryValues(newFeatures)
+        self.layer.reload()
+#
+#
+#
+#        return
+
+        #with multiprocessing.Pool() as p:
+        #    self.layer.dataProvider().changeGeometryValues({
+        #        f[0]: f[1] for f in p.map(
+        #            _transformGeometry,
+        #            [feature.geometry().geometry().clone().asWkb() if self.passGeometryAsWkb else feature.geometry().geometry().clone()]
+        #            for feature in self.layer.getFeatures()
+        #        )
+        #    })
+
+
+def transformGeometry(metaFeatures, reductionFactor, isMulti, feature):
+        (featureId, wkb) = feature
+
+        abstractGeometry = QgsMultiPolygonV2() if isMulti else QgsPolygonV2()
+        abstractGeometry.fromWkb(QgsConstWkbPtr(wkb))
+       
         for p in range(abstractGeometry.partCount()):
             for r in range(abstractGeometry.ringCount(p)):
                 for v in range(abstractGeometry.vertexCount(p, r) - 1):
@@ -179,18 +248,19 @@ class CartogramWorker(QObject):
                         if not vertexId.isValid():
                             continue
                     point = abstractGeometry.vertexAt(vertexId)
-                    point = self.transformPoint(point)
+                    point = transformPoint(metaFeatures, reductionFactor, point)
                     abstractGeometry.moveVertex(vertexId, point)
-        self.progress.emit(1)
-        return abstractGeometry
-        #return QgsGeometry(abstractGeometry)
+        
+        #self.progress.emit(1)
 
-    def transformPoint(self, point):
+        return (featureId, abstractGeometry.asWkb())
+
+def transformPoint(metaFeatures, reductionFactor, point):
         x = x0 = point.x()
         y = y0 = point.y()
 
         # calculate the influence of all polygons on this point
-        for metaFeature in self.metaFeatures:
+        for metaFeature in metaFeatures:
             if metaFeature.mass == 0:
                 continue
 
@@ -206,7 +276,7 @@ class CartogramWorker(QObject):
                 dr = distance / metaFeature.radius
                 force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
 
-            force *= self.reductionFactor / distance
+            force *= reductionFactor / distance
 
             x += (x0 - cx) * force
             y += (y0 - cy) * force
@@ -220,7 +290,7 @@ class CartogramMetaFeature(object):
     def __init__(self, geometry, value, minValue):
 
         self.area = geometry.area()
-        self.radius = math.sqrt(self.area / math.pi)
+        self.radius = math.sqrt(self.area / math.pi) if self.area > 0 else 0
 
         if value > 0:
             self.value = value
