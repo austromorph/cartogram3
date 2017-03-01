@@ -32,6 +32,7 @@ from qgis.core import (
     QgsGeometry,
     QgsMessageLog,
     QgsMultiPolygonV2,
+    QgsPointV2,
     QgsPolygonV2,
     QgsVertexId,
     QgsWkbTypes
@@ -193,27 +194,29 @@ class CartogramWorker(QObject):
         #    )((feature.id(),feature.geometry().geometry().clone()))
         #    QgsMessageLog.logMessage(repr(rV))
 
-        _transformGeometry = functools.partial(
-            transformGeometry,
-            self.metaFeatures,
-            self.reductionFactor,
-            self.isMulti
-        )
+    #    _transformGeometry = functools.partial(
+    #       transformGeometry,
+    #        self.metaFeatures,
+    #        self.reductionFactor,
+    #        self.isMulti
+    #    )
+#
+#        features = [(feature.id(),feature.geometry().geometry().asWkb()) for feature in self.layer.getFeatures()]
+#        newFeatures = {}
+#
+#        with multiprocessing.Pool() as p:
+#            for (featureId, wkb) in p.imap_unordered(
+#                _transformGeometry,
+#                features
+#            ):
+#                geometry = QgsGeometry()
+#                geometry.fromWkb(wkb)
+#                newFeatures[featureId]=geometry
+#                QgsMessageLog.logMessage(".")
 
-        features = [(feature.id(),feature.geometry().geometry().asWkb()) for feature in self.layer.getFeatures()]
-        newFeatures = {}
-
-        with multiprocessing.Pool() as p:
-            for (featureId, wkb) in p.imap_unordered(
-                _transformGeometry,
-                features
-            ):
-                geometry = QgsGeometry()
-                geometry.fromWkb(wkb)
-                newFeatures[featureId]=geometry
-                QgsMessageLog.logMessage(".")
-
-        self.layer.dataProvider().changeGeometryValues(newFeatures)
+        self.layer.dataProvider().changeGeometryValues({
+            feature.id(): self.transformGeometry(feature.geometry()) for feature in self.layer.getFeatures()
+        })
         self.layer.reload()
 #
 #
@@ -229,13 +232,10 @@ class CartogramWorker(QObject):
         #        )
         #    })
 
+    def transformGeometry(self, geometry):
+        abstractGeometry = geometry.geometry()
 
-def transformGeometry(metaFeatures, reductionFactor, isMulti, feature):
-        (featureId, wkb) = feature
-
-        abstractGeometry = QgsMultiPolygonV2() if isMulti else QgsPolygonV2()
-        abstractGeometry.fromWkb(QgsConstWkbPtr(wkb))
-       
+        points = []
         for p in range(abstractGeometry.partCount()):
             for r in range(abstractGeometry.ringCount(p)):
                 for v in range(abstractGeometry.vertexCount(p, r) - 1):
@@ -248,16 +248,29 @@ def transformGeometry(metaFeatures, reductionFactor, isMulti, feature):
                         if not vertexId.isValid():
                             continue
                     point = abstractGeometry.vertexAt(vertexId)
-                    point = transformPoint(metaFeatures, reductionFactor, point)
-                    abstractGeometry.moveVertex(vertexId, point)
-        
-        #self.progress.emit(1)
+                    points.append(((p,r,v),(point.x(),point.y())))
 
-        return (featureId, abstractGeometry.asWkb())
+        _transformPoint = functools.partial(
+                transformPoint,
+                self.metaFeatures, 
+                self.reductionFactor
+        )
+
+        with multiprocessing.Pool() as p:
+            [abstractGeometry.moveVertex(QgsVertexId(p,r,v,QgsVertexId.SegmentVertex), QgsPointV2(x,y)) for ((p,r,v),(x,y)) in p.map(_transformPoint, points)]
+
+        #point = transformPoint(metaFeatures, reductionFactor, point)
+        #abstractGeometry.moveVertex(vertexId, point)
+
+        self.progress.emit(1)
+
+        return geometry
 
 def transformPoint(metaFeatures, reductionFactor, point):
-        x = x0 = point.x()
-        y = y0 = point.y()
+        (vertexId, point) = point
+
+        x = x0 = point[0]
+        y = y0 = point[1]
 
         # calculate the influence of all polygons on this point
         for metaFeature in metaFeatures:
@@ -281,9 +294,7 @@ def transformPoint(metaFeatures, reductionFactor, point):
             x += (x0 - cx) * force
             y += (y0 - cy) * force
 
-        point.setX(x)
-        point.setY(y)
-        return point
+        return (vertexId, (x,y))
 
 
 class CartogramMetaFeature(object):
