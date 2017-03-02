@@ -3,7 +3,7 @@ name=cartogram3
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.99
 description=Generate anamorphic maps
-version=2.99.2
+version=2.99.3rc
 author=Christoph Fink
 email=morph@austromorph.space
 
@@ -14,7 +14,9 @@ about=This plugin creates continous cartograms (a.k.a. anamorphic maps) from pol
 tracker=https://github.com/austromorph/cartogram3/issues
 repository=https://github.com/austromorph/cartogram3
 
-changelog=2.99.2 (2017-02-20): 
+changelog=2.99.3 (2017-03-03):
+        – significant performance improvements
+    2.99.2 (2017-02-20): 
         – support for QGIS on Microsoft Windows
     2.99.1 (2017-02-18): 
         – added sample data

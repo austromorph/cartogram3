@@ -1,6 +1,8 @@
 Change Log 
 ==========
 
+* __2.99.3__ (2017-03-03):
+	* significant performance improvements
 * __2.99.2__ (2017-02-20):
 	* support for QGIS on Microsoft Windows
 * __2.99.1__ (2017-02-18):
