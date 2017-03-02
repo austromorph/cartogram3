@@ -248,30 +248,6 @@ class Cartogram:
         else:
             self.dialog.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
-    def createMemoryLayer(self, layerName, sourceLayer):
-        # create empty memory layer
-        memoryLayer = QgsVectorLayer(
-            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType()) +
-            "?crs=" + sourceLayer.crs().authid() +
-            "&index=yes",
-            layerName,
-            "memory"
-        )
-        memoryLayerDataProvider = memoryLayer.dataProvider()
-
-        # copy the table structure
-        memoryLayer.startEditing()
-        memoryLayerDataProvider.addAttributes(
-            sourceLayer.fields().toList()
-        )
-        memoryLayer.commitChanges()
-
-        # copy the features
-        memoryLayerDataProvider.addFeatures(
-            list(sourceLayer.getFeatures())
-        )
-
-        return memoryLayer
 
     def run(self):
         """Run method that performs all the real work"""
@@ -334,20 +310,9 @@ class Cartogram:
             self.maxAverageError = \
                 self.dialog.averageErrorDoubleSpinBox.value() / 100.0 + 1.0
 
-            # save a copy of the current status of the input layer
-            self.memoryLayer = self.createMemoryLayer(
-                "cartogram base",
-                self.inputLayer
-            )
-
             # remember the input layer’s style
             self.inputLayerStyle = QDomDocument()
             self.inputLayer.exportNamedStyle(self.inputLayerStyle, "")
-
-            # which fields to process on
-            self.jobs = queue.Queue()
-            for fieldName in self.selectedFields:
-                self.jobs.put(fieldName)
 
             # set up all widgets for status reporting
             self.progressBar = QProgressBar()
@@ -355,7 +320,7 @@ class Cartogram:
             self.progressBar.setMaximum(
                 len(self.selectedFields) *
                 self.maxIterations *
-                len(list(self.memoryLayer.getFeatures())) +
+                len(list(self.inputLayer.getFeatures())) +
                 1
             )
 
@@ -365,7 +330,7 @@ class Cartogram:
             )
 
             cancelButton = QPushButton(self.tr("Cancel"))
-            cancelButton.clicked.connect(self.killWorker)
+            cancelButton.clicked.connect(self.stopWorker)
 
             self.messageBarItem = self.iface.messageBar().createMessage("")
             for widget in [
@@ -400,23 +365,9 @@ class Cartogram:
             pass
 
     def startWorker(self):
-        try:
-            fieldName = self.jobs.get(False)
-        except queue.Empty:
-            del self.jobs
-            self.iface.messageBar().popWidget(self.messageBarItem)
-            self.t = timeit.default_timer() - self.t
-            QgsMessageLog.logMessage("{}s".format(self.t))
-            return
-
-        memoryLayer = self.createMemoryLayer(
-            "cartogram_{}".format(fieldName),
-            self.memoryLayer
-        )
-
         worker = CartogramWorker(
-            memoryLayer,
-            fieldName,
+            self.inputLayer,
+            self.selectedFields,
             self.maxIterations,
             self.maxAverageError,
             self.tr
@@ -426,6 +377,7 @@ class Cartogram:
 
         # connecting signals+slots
         worker.finished.connect(self.workerFinished)
+        worker.cartogramComplete.connect(self.workerCartogramComplete)
         worker.error.connect(self.workerError)
         worker.progress.connect(self.updateProgressBar)
         worker.status.connect(self.updateStatusMessage)
@@ -436,28 +388,32 @@ class Cartogram:
         self.worker = worker
         self.thread = thread
 
-    def killWorker(self):
+    def stopWorker(self):
         self.worker.stopped = True
-        self.jobs = queue.Queue()  # empty queue
 
-    def workerFinished(
+
+    def workerFinished(self):
+        try:
+            self.worker.deleteLater()
+        except:
+            pass
+        self.thread.quit()
+        self.thread.wait()
+        self.thread.terminate()
+        self.thread.deleteLater()
+
+        self.iface.messageBar().popWidget(self.messageBarItem)
+        self.t = timeit.default_timer() - self.t
+        QgsMessageLog.logMessage("{}s".format(self.t))
+
+
+    def workerCartogramComplete(
         self,
         layer=None,
         fieldName=None,
         iterations=None,
         avgError=None
     ):
-        # clean up
-        try:
-            self.worker.deleteLater()
-            self.thread.quit()
-            self.thread.wait()
-            self.thread.terminate()
-            self.thread.deleteLater()
-        except:
-            pass
-
-        # add output layer to qgis project
         if layer is not None:
             # try to update the style xml before applying it,
             # hide input layer
@@ -490,8 +446,6 @@ class Cartogram:
                 self.tr("cartogram3 computation cancelled by user")
             )
 
-        # check whether there‘s still jobs
-        self.startWorker()
 
     def workerError(self, e, exceptionString):
         self.iface.messageBar().pushCritical(
@@ -558,3 +512,29 @@ class Cartogram:
 
         QgsProject.instance().addMapLayer(sampleLayer)
         del sampleDataset
+
+
+    def createMemoryLayer(self, layerName, sourceLayer):
+        # create empty memory layer
+        memoryLayer = QgsVectorLayer(
+            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType()) +
+            "?crs=" + sourceLayer.crs().authid() +
+            "&index=yes",
+            layerName,
+            "memory"
+        )
+        memoryLayerDataProvider = memoryLayer.dataProvider()
+
+        # copy the table structure
+        memoryLayer.startEditing()
+        memoryLayerDataProvider.addAttributes(
+            sourceLayer.fields().toList()
+        )
+        memoryLayer.commitChanges()
+
+        # copy the features
+        memoryLayerDataProvider.addFeatures(
+            list(sourceLayer.getFeatures())
+        )
+
+        return memoryLayer
