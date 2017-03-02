@@ -23,6 +23,7 @@
 import os.path
 import locale
 import queue
+import timeit
 
 from PyQt5.QtCore import (
     QSettings,
@@ -325,6 +326,8 @@ class Cartogram:
         result = self.dialog.exec_()
         # See if OK was pressed
         if result:
+            self.t=timeit.default_timer()
+
             self.inputLayer = self.dialog.layerComboBox.currentLayer()
             self.selectedFields = self.dialog.fieldListView.selectedFields()
             self.maxIterations = self.dialog.iterationsSpinBox.value()
@@ -402,6 +405,8 @@ class Cartogram:
         except queue.Empty:
             del self.jobs
             self.iface.messageBar().popWidget(self.messageBarItem)
+            self.t = timeit.default_timer() - self.t
+            QgsMessageLog.logMessage("{}s".format(self.t))
             return
 
         memoryLayer = self.createMemoryLayer(

@@ -15,7 +15,6 @@
 import math
 import multiprocessing
 import os
-import pickle
 import platform
 import sys
 import traceback
@@ -27,7 +26,9 @@ from PyQt5.QtCore import (
 
 from qgis.core import (
     QgsGeometry,
-    QgsVertexId
+    QgsPointV2,
+    QgsVertexId,
+    QgsWkbTypes
 )
 
 if platform.system() == "Windows":
@@ -52,6 +53,12 @@ class CartogramWorker(QObject):
         self.maxAverageError = maxAverageError
         self.tr = tr
 
+        # remember whether we deal with a MultiGeometry:
+        self.isMulti = QgsWkbTypes.isMultiType(layer.dataProvider().wkbType())
+
+        # find the min value > 0 and set all
+        # values <= 0 to 1/100 of it
+        # (algorithm cannot deal with 0-values
         self.minValue = min([
             feature[fieldName]
             for feature in layer.getFeatures()
@@ -154,71 +161,133 @@ class CartogramWorker(QObject):
         return metaFeature.sizeError
 
     def transformFeatures(self):
-        self.layer.dataProvider().changeGeometryValues({
-            feature.id(): QgsGeometry(
-                self.transformGeometry(feature.geometry().geometry().clone())
+        inQueue  = multiprocessing.Queue()
+        outQueue = multiprocessing.Queue()
+
+        threads = []
+        numThreads = multiprocessing.cpu_count() + 1
+
+        for _ in range(numThreads):
+            p = multiprocessing.Process(
+                target=transformPoint,
+                args=(
+                    self.metaFeatures,
+                    self.reductionFactor,
+                    inQueue,
+                    outQueue
+                )
             )
-            for feature in self.layer.getFeatures()
-        })
+            p.start()
+            threads.append(p)
 
-    def transformGeometry(self, abstractGeometry):
-        if self.stopped:
-            return abstractGeometry
-        #abstractGeometry = geometry.geometry().clone()
-        for p in range(abstractGeometry.partCount()):
-            for r in range(abstractGeometry.ringCount(p)):
-                for v in range(abstractGeometry.vertexCount(p, r) - 1):
-                    # -1 because the last one is the first one again
-                    vertexId = QgsVertexId(p, r, v, QgsVertexId.SegmentVertex)
-                    if not vertexId.isValid():
-                        vertexId = QgsVertexId(
-                            p, r, v, QgsVertexId.CurveVertex
-                        )
+        features = \
+            {feature.id(): feature.geometry()
+                for feature in self.layer.getFeatures()}
+
+        for featureId in features:
+            abstractGeometry = features[featureId].geometry()
+            for p in range(abstractGeometry.partCount()):
+                for r in range(abstractGeometry.ringCount(p)):
+                    for v in range(abstractGeometry.vertexCount(p, r) - 1):
+                        # -1 because the last one is the first one again
+                        vertexId = \
+                            QgsVertexId(p, r, v, QgsVertexId.SegmentVertex)
                         if not vertexId.isValid():
-                            continue
-                    point = abstractGeometry.vertexAt(vertexId)
-                    point = self.transformPoint(point)
-                    abstractGeometry.moveVertex(vertexId, point)
-        self.progress.emit(1)
-        return abstractGeometry
-        #return QgsGeometry(abstractGeometry)
+                            vertexId = QgsVertexId(
+                                p, r, v, QgsVertexId.CurveVertex
+                            )
+                            if not vertexId.isValid():
+                                continue
+                        point = abstractGeometry.vertexAt(vertexId)
+                        inQueue.put(
+                            ((featureId, p, r, v), (point.x(), point.y()))
+                        )
 
-    def transformPoint(self, point):
-        x = x0 = point.x()
-        y = y0 = point.y()
+        for _ in range(numThreads):
+            inQueue.put((None, (None, None)))
 
-        # calculate the influence of all polygons on this point
-        for metaFeature in self.metaFeatures:
-            if metaFeature.mass == 0:
-                continue
+        while True:
+            if self.stopped:
+                # clean inQueue
+                while True:
+                    (f, g) = inQueue.get()
+                    if f is None:
+                        break
 
-            cx = metaFeature.cx
-            cy = metaFeature.cy
-            distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
+                # put some more death pills so everybody gets one
+                for i in range(numThreads):
+                    inQueue.put((None, None))
 
-            if distance > metaFeature.radius:
-                # force on points ‘far away’ from the centroid
-                force = metaFeature.mass * metaFeature.radius / distance
-            else:
-                # force on points close to the centroid
-                dr = distance / metaFeature.radius
-                force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
+                # wait for the children to die
+                for p in threads:
+                    p.join()
 
-            force *= self.reductionFactor / distance
+                # give up ourselves (main thread)
+                break
 
-            x += (x0 - cx) * force
-            y += (y0 - cy) * force
+            ((featureId, p, r, v), (x, y)) = outQueue.get()
+            if featureId is None:
+                numThreads -= 1
+                if numThreads == 0:
+                    break
+                else:
+                    continue
 
-        point.setX(x)
-        point.setY(y)
-        return point
+            abstractGeometry = features[featureId].geometry()
+            abstractGeometry.moveVertex(
+                QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
+                QgsPointV2(x, y)
+            )
+            features[featureId].setGeometry(abstractGeometry)
+
+            self.progress.emit(1)
+
+        self.layer.dataProvider().changeGeometryValues(features)
+        self.layer.reload()
+
+
+def transformPoint(metaFeatures, reductionFactor, inQueue, outQueue):
+        while True:
+            (vertexId, (x0, y0)) = inQueue.get()
+            if vertexId is None:
+                outQueue.put(
+                    ((None, None, None, None), (None, None))
+                )
+                return
+
+            x = x0
+            y = y0
+
+            # calculate the influence of all polygons on this point
+            for metaFeature in metaFeatures:
+                if metaFeature.mass == 0:
+                    continue
+
+                cx = metaFeature.cx
+                cy = metaFeature.cy
+                distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
+
+                if distance > metaFeature.radius:
+                    # force on points ‘far away’ from the centroid
+                    force = metaFeature.mass * metaFeature.radius / distance
+                else:
+                    # force on points close to the centroid
+                    dr = distance / metaFeature.radius
+                    force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
+
+                force *= reductionFactor / distance
+
+                x += (x0 - cx) * force
+                y += (y0 - cy) * force
+
+            outQueue.put((vertexId, (x, y)))
 
 
 class CartogramMetaFeature(object):
     def __init__(self, geometry, value, minValue):
 
         self.area = geometry.area()
-        self.radius = math.sqrt(self.area / math.pi)
+        self.radius = math.sqrt(self.area / math.pi) if self.area > 0 else 0
 
         if value > 0:
             self.value = value
