@@ -334,6 +334,7 @@ class Cartogram:
             self.maxAverageError = \
                 self.dialog.averageErrorDoubleSpinBox.value() / 100.0 + 1.0
 
+            QgsMessageLog.logMessage(str(self.inputLayer.id()))
             # save a copy of the current status of the input layer
             self.memoryLayer = self.createMemoryLayer(
                 "cartogram base",
@@ -409,13 +410,19 @@ class Cartogram:
             QgsMessageLog.logMessage("{}s".format(self.t))
             return
 
-        memoryLayer = self.createMemoryLayer(
+        QgsMessageLog.logMessage(str(self.memoryLayer.id()))
+        QgsProject.instance().addMapLayer(self.memoryLayer)
+
+        baseLayer = self.createMemoryLayer(
             "cartogram_{}".format(fieldName),
             self.memoryLayer
         )
 
+        QgsMessageLog.logMessage(str(baseLayer.id()))
+        QgsProject.instance().addMapLayer(baseLayer)
+
         worker = CartogramWorker(
-            memoryLayer,
+            baseLayer,
             fieldName,
             self.maxIterations,
             self.maxAverageError,
@@ -454,8 +461,8 @@ class Cartogram:
             self.thread.wait()
             self.thread.terminate()
             self.thread.deleteLater()
-        except:
-            pass
+        except Exception as e:
+            QgsMessageLog.logMessage(repr(e))
 
         # add output layer to qgis project
         if layer is not None:

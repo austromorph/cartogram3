@@ -136,6 +136,7 @@ class CartogramWorker(QObject):
         totalValue = sum([metaFeature.value for metaFeature in metaFeatures])
 
         areaValueRatio = totalArea / totalValue
+        #_metafeat
 
         totalError = sum([
             self.metaFeatureError(metaFeature, areaValueRatio)
