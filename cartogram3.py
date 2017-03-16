@@ -48,6 +48,8 @@ from PyQt5.QtXml import (
 )
 
 from qgis.core import (
+    QgsFeature,
+    QgsGeometry,
     QgsMapLayer,
     QgsMapLayerProxyModel,
     QgsMessageLog,
@@ -267,9 +269,17 @@ class Cartogram:
         memoryLayer.commitChanges()
 
         # copy the features
-        memoryLayerDataProvider.addFeatures(
-            list(sourceLayer.getFeatures())
-        )
+        #memoryLayerDataProvider.addFeatures(
+        #    [QgsFeature(feature) for feature in sourceLayer.getFeatures()]
+        #)
+
+        # DEEP copy the features
+        features= []
+        for feature in sourceLayer.getFeatures():
+            f = QgsFeature(feature)
+            f.setGeometry(QgsGeometry(feature.geometry()))
+            features.append(f)
+        memoryLayerDataProvider.addFeatures(features)
 
         return memoryLayer
 

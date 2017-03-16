@@ -26,6 +26,7 @@ from PyQt5.QtCore import (
 
 from qgis.core import (
     QgsGeometry,
+    QgsMessageLog,
     QgsPointV2,
     QgsVertexId,
     QgsWkbTypes
@@ -138,6 +139,7 @@ class CartogramWorker(QObject):
         areaValueRatio = totalArea / totalValue
         #_metafeat
 
+        # mp.map!!!
         totalError = sum([
             self.metaFeatureError(metaFeature, areaValueRatio)
             for metaFeature in metaFeatures
@@ -234,7 +236,7 @@ class CartogramWorker(QObject):
                 else:
                     continue
 
-            abstractGeometry = features[featureId].geometry()
+            abstractGeometry = features[featureId].geometry().clone()
             abstractGeometry.moveVertex(
                 QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
                 QgsPointV2(x, y)
