@@ -28,6 +28,7 @@ from qgis.core import (
     QgsGeometry,
     QgsMessageLog,
     QgsPointV2,
+    QgsVectorLayer,
     QgsVertexId,
     QgsWkbTypes
 )
@@ -40,91 +41,132 @@ if platform.system() == "Windows":
 
 
 class CartogramWorker(QObject):
-    finished = pyqtSignal(object, str, int, float)
+    cartogramComplete = pyqtSignal(object, str, int, float)
+    finished = pyqtSignal()
     error = pyqtSignal(Exception, str)
     progress = pyqtSignal(int)
     status = pyqtSignal(str)
 
-    def __init__(self, layer, fieldName, maxIterations, maxAverageError, tr):
+    def __init__(self, layer, fieldNames, maxIterations, maxAverageError, tr):
         QObject.__init__(self)
 
-        self.layer = layer
-        self.fieldName = fieldName
+        self.inputLayer = layer
+        self.fieldNames = fieldNames
         self.maxIterations = maxIterations
         self.maxAverageError = maxAverageError
         self.tr = tr
 
-        # remember whether we deal with a MultiGeometry:
-        self.isMulti = QgsWkbTypes.isMultiType(layer.dataProvider().wkbType())
+        # make an in-memory-copy of the input layer:
+        memoryLayer = self.createMemoryLayer(
+            "cartogram base",
+            self.inputLayer
+        )
+        self.inputLayer = memoryLayer
 
-        # find the min value > 0 and set all
-        # values <= 0 to 1/100 of it
-        # (algorithm cannot deal with 0-values
-        self.minValue = min([
-            feature[fieldName]
-            for feature in layer.getFeatures()
-            if feature[fieldName] > 0
-        ]) / 100.0
-        self.numFeatures = self.layer.featureCount()
-
-        self.stopped = False
+        self.numFeatures = self.inputLayer.featureCount()
 
     def run(self):
         try:
             self.stopped = False
 
-            for feature in self.layer.getFeatures():
-                if feature[self.fieldName] <= 0:
-                    feature[self.fieldName] = self.minValue
+            for fieldName in self.fieldNames:
+                self.fieldName = fieldName
 
-            iterations = 0
-            while True:
-                # did the user click the cancel button?
-                if self.stopped:
-                    self.finished.emit(None, "", 0, 0.0)
-                    break
-
-                (self.metaFeatures, self.reductionFactor, averageError) = \
-                    self.getReductionFactor()
-
-                # stop conditions met?
-                if (iterations >= self.maxIterations or
-                        averageError <= self.maxAverageError):
-                    # return the layer
-                    self.finished.emit(
-                        self.layer,
-                        self.fieldName,
-                        iterations,
-                        averageError
-                    )
-                    # also, fast-forward the progress bar
-                    # in case we skipped iterations
-                    self.progress.emit(
-                            self.numFeatures *
-                            (self.maxIterations - iterations)
-                    )
-                    # and finally, break out of the loop
-                    break
-
-                # we got until here? well then let’s take this baby
-                # for another round
-                iterations += 1
-
-                self.status.emit(
-                    self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
-                        i=iterations,
-                        mI=self.maxIterations,
-                        fN=self.fieldName
-                    )
+                memoryLayer = self.createMemoryLayer(
+                    "cartogram_{}".format(fieldName),
+                    self.inputLayer
                 )
+                self.layer = memoryLayer
 
-                self.transformFeatures()
+                # find the min value > 0 and set all
+                # values <= 0 to 1/100 of it
+                # (algorithm cannot deal with 0-values
+                self.minValue = min([
+                    feature[fieldName]
+                    for feature in self.layer.getFeatures()
+                    if feature[fieldName] > 0
+                ]) / 100.0
+
+                for feature in self.layer.getFeatures():
+                    if feature[self.fieldName] <= 0:
+                        feature[self.fieldName] = self.minValue
+
+                iterations = 0
+                while True:
+                    # did the user click the cancel button?
+                    if self.stopped:
+                        self.cartogramComplete.emit(None, "", 0, 0.0)
+                        self.finished.emit()
+                        break
+
+                    (self.metaFeatures, self.reductionFactor, averageError) = \
+                        self.getReductionFactor()
+
+                    # stop conditions met?
+                    if (iterations >= self.maxIterations or
+                            averageError <= self.maxAverageError):
+                        # return the layer
+                        self.cartogramComplete.emit(
+                            self.layer,
+                            self.fieldName,
+                            iterations,
+                            averageError
+                        )
+                        # also, fast-forward the progress bar
+                        # in case we skipped iterations
+                        self.progress.emit(
+                                self.numFeatures *
+                                (self.maxIterations - iterations)
+                        )
+                        # and finally, break out of the loop
+                        break
+
+                    # we got until here? well then let’s take this baby
+                    # for another round
+                    iterations += 1
+
+                    self.status.emit(
+                        self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
+                            i=iterations,
+                            mI=self.maxIterations,
+                            fN=self.fieldName
+                        )
+                    )
+
+                    self.transformFeatures()
+
+            self.finished.emit()
 
         except Exception as e:
             self.error.emit(
                 e,
                 traceback.format_exc()
             )
+
+    def createMemoryLayer(self, layerName, sourceLayer):
+        # create empty memory layer
+        memoryLayer = QgsVectorLayer(
+            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType()) +
+            "?crs=" + sourceLayer.crs().authid() +
+            "&index=yes",
+            layerName,
+            "memory"
+        )
+        memoryLayerDataProvider = memoryLayer.dataProvider()
+
+        # copy the table structure
+        memoryLayer.startEditing()
+        memoryLayerDataProvider.addAttributes(
+            sourceLayer.fields().toList()
+        )
+        memoryLayer.commitChanges()
+
+        # copy the features
+        memoryLayerDataProvider.addFeatures(
+            list(sourceLayer.getFeatures())
+        )
+
+        return memoryLayer
 
     def getReductionFactor(self):
         metaFeatures = [
@@ -144,6 +186,18 @@ class CartogramWorker(QObject):
             self.metaFeatureError(metaFeature, areaValueRatio)
             for metaFeature in metaFeatures
         ])
+
+#        _metaFeatureError = functools.partial(
+#            metaFeatureError,
+#            areaValueRatio
+#        )
+
+#        with multiprocessing.Pool(multiprocessing.cpu_count() + 1) as p:
+#            metaFeatures = p.map(_metaFeatureError, metaFeatures)
+
+#        totalError = \
+#            sum([metaFeature.sizeError for metaFeature in metaFeatures])
+
         averageError = totalError / self.numFeatures
         reductionFactor = 1 / (averageError + 1)
 
@@ -205,6 +259,7 @@ class CartogramWorker(QObject):
                         inQueue.put(
                             ((featureId, p, r, v), (point.x(), point.y()))
                         )
+            self.progress.emit(1)
 
         for _ in range(numThreads):
             inQueue.put((None, (None, None)))
@@ -219,7 +274,7 @@ class CartogramWorker(QObject):
 
                 # put some more death pills so everybody gets one
                 for i in range(numThreads):
-                    inQueue.put((None, None))
+                    inQueue.put((None, (None, None)))
 
                 # wait for the children to die
                 for p in threads:
@@ -243,47 +298,60 @@ class CartogramWorker(QObject):
             )
             features[featureId].setGeometry(abstractGeometry)
 
-            self.progress.emit(1)
-
         self.layer.dataProvider().changeGeometryValues(features)
         self.layer.reload()
 
 
 def transformPoint(metaFeatures, reductionFactor, inQueue, outQueue):
-        while True:
-            (vertexId, (x0, y0)) = inQueue.get()
-            if vertexId is None:
-                outQueue.put(
-                    ((None, None, None, None), (None, None))
-                )
-                return
+    while True:
+        (vertexId, (x0, y0)) = inQueue.get()
+        if vertexId is None:
+            outQueue.put(
+                ((None, None, None, None), (None, None))
+            )
+            return
 
-            x = x0
-            y = y0
+        x = x0
+        y = y0
 
-            # calculate the influence of all polygons on this point
-            for metaFeature in metaFeatures:
-                if metaFeature.mass == 0:
-                    continue
+        # calculate the influence of all polygons on this point
+        for metaFeature in metaFeatures:
+            if metaFeature.mass == 0:
+                continue
 
-                cx = metaFeature.cx
-                cy = metaFeature.cy
-                distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
+            cx = metaFeature.cx
+            cy = metaFeature.cy
+            distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
 
-                if distance > metaFeature.radius:
-                    # force on points ‘far away’ from the centroid
-                    force = metaFeature.mass * metaFeature.radius / distance
-                else:
-                    # force on points close to the centroid
-                    dr = distance / metaFeature.radius
-                    force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
+            if distance > metaFeature.radius:
+                # force on points ‘far away’ from the centroid
+                force = metaFeature.mass * metaFeature.radius / distance
+            else:
+                # force on points close to the centroid
+                dr = distance / metaFeature.radius
+                force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
 
-                force *= reductionFactor / distance
+            force *= reductionFactor / distance
 
-                x += (x0 - cx) * force
-                y += (y0 - cy) * force
+            x += (x0 - cx) * force
+            y += (y0 - cy) * force
 
-            outQueue.put((vertexId, (x, y)))
+        outQueue.put((vertexId, (x, y)))
+
+
+#def metaFeatureError(areaValueRatio, metaFeature):
+#    desiredArea = metaFeature.value * areaValueRatio
+#    if desiredArea <= 0:
+#        metaFeature.mass = 0.0
+#    else:
+#        metaFeature.mass = \
+#            math.sqrt(desiredArea / math.pi) - metaFeature.radius
+#
+#    metaFeature.sizeError = \
+#        max(metaFeature.area, desiredArea) / \
+#        min(metaFeature.area, desiredArea)
+#
+#    return metaFeature
 
 
 class CartogramMetaFeature(object):
