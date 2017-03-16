@@ -64,7 +64,6 @@ class CartogramWorker(QObject):
 
         self.numFeatures = self.inputLayer.featureCount()
 
-
     def run(self):
         try:
             self.stopped = False
@@ -90,7 +89,7 @@ class CartogramWorker(QObject):
                 for feature in self.layer.getFeatures():
                     if feature[self.fieldName] <= 0:
                         feature[self.fieldName] = self.minValue
-    
+
                 iterations = 0
                 while True:
                     # did the user click the cancel button?
@@ -98,10 +97,10 @@ class CartogramWorker(QObject):
                         self.cartogramComplete.emit(None, "", 0, 0.0)
                         self.finished.emit()
                         break
-    
+
                     (self.metaFeatures, self.reductionFactor, averageError) = \
                         self.getReductionFactor()
-    
+
                     # stop conditions met?
                     if (iterations >= self.maxIterations or
                             averageError <= self.maxAverageError):
@@ -120,11 +119,11 @@ class CartogramWorker(QObject):
                         )
                         # and finally, break out of the loop
                         break
-    
+
                     # we got until here? well then let’s take this baby
                     # for another round
                     iterations += 1
-    
+
                     self.status.emit(
                         self.tr("Iteration {i}/{mI} for field ‘{fN}’").format(
                             i=iterations,
@@ -132,7 +131,7 @@ class CartogramWorker(QObject):
                             fN=self.fieldName
                         )
                     )
-    
+
                     self.transformFeatures()
 
             self.finished.emit()
@@ -142,7 +141,6 @@ class CartogramWorker(QObject):
                 e,
                 traceback.format_exc()
             )
-
 
     def createMemoryLayer(self, layerName, sourceLayer):
         # create empty memory layer
@@ -169,7 +167,6 @@ class CartogramWorker(QObject):
 
         return memoryLayer
 
-
     def getReductionFactor(self):
         metaFeatures = [
             CartogramMetaFeature(
@@ -186,6 +183,18 @@ class CartogramWorker(QObject):
             self.metaFeatureError(metaFeature, areaValueRatio)
             for metaFeature in metaFeatures
         ])
+
+#        _metaFeatureError = functools.partial(
+#            metaFeatureError,
+#            areaValueRatio
+#        )
+
+#        with multiprocessing.Pool(multiprocessing.cpu_count() + 1) as p:
+#            metaFeatures = p.map(_metaFeatureError, metaFeatures)
+
+#        totalError = \
+#            sum([metaFeature.sizeError for metaFeature in metaFeatures])
+
         averageError = totalError / self.numFeatures
         reductionFactor = 1 / (averageError + 1)
 
@@ -279,7 +288,7 @@ class CartogramWorker(QObject):
                 else:
                     continue
 
-            abstractGeometry = features[featureId].geometry()
+            abstractGeometry = features[featureId].geometry().clone()
             abstractGeometry.moveVertex(
                 QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
                 QgsPointV2(x, y)
@@ -291,40 +300,55 @@ class CartogramWorker(QObject):
 
 
 def transformPoint(metaFeatures, reductionFactor, inQueue, outQueue):
-        while True:
-            (vertexId, (x0, y0)) = inQueue.get()
-            if vertexId is None:
-                outQueue.put(
-                    ((None, None, None, None), (None, None))
-                )
-                return
+    while True:
+        (vertexId, (x0, y0)) = inQueue.get()
+        if vertexId is None:
+            outQueue.put(
+                ((None, None, None, None), (None, None))
+            )
+            return
 
-            x = x0
-            y = y0
+        x = x0
+        y = y0
 
-            # calculate the influence of all polygons on this point
-            for metaFeature in metaFeatures:
-                if metaFeature.mass == 0:
-                    continue
+        # calculate the influence of all polygons on this point
+        for metaFeature in metaFeatures:
+            if metaFeature.mass == 0:
+                continue
 
-                cx = metaFeature.cx
-                cy = metaFeature.cy
-                distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
+            cx = metaFeature.cx
+            cy = metaFeature.cy
+            distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
 
-                if distance > metaFeature.radius:
-                    # force on points ‘far away’ from the centroid
-                    force = metaFeature.mass * metaFeature.radius / distance
-                else:
-                    # force on points close to the centroid
-                    dr = distance / metaFeature.radius
-                    force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
+            if distance > metaFeature.radius:
+                # force on points ‘far away’ from the centroid
+                force = metaFeature.mass * metaFeature.radius / distance
+            else:
+                # force on points close to the centroid
+                dr = distance / metaFeature.radius
+                force = metaFeature.mass * (dr ** 2) * (4 - (3 * dr))
 
-                force *= reductionFactor / distance
+            force *= reductionFactor / distance
 
-                x += (x0 - cx) * force
-                y += (y0 - cy) * force
+            x += (x0 - cx) * force
+            y += (y0 - cy) * force
 
-            outQueue.put((vertexId, (x, y)))
+        outQueue.put((vertexId, (x, y)))
+
+
+#def metaFeatureError(areaValueRatio, metaFeature):
+#    desiredArea = metaFeature.value * areaValueRatio
+#    if desiredArea <= 0:
+#        metaFeature.mass = 0.0
+#    else:
+#        metaFeature.mass = \
+#            math.sqrt(desiredArea / math.pi) - metaFeature.radius
+#
+#    metaFeature.sizeError = \
+#        max(metaFeature.area, desiredArea) / \
+#        min(metaFeature.area, desiredArea)
+#
+#    return metaFeature
 
 
 class CartogramMetaFeature(object):

@@ -92,10 +92,12 @@ class Cartogram:
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
-        
+
         try:
-            locale.setlocale(locale.LC_ALL, 
-                QSettings().value('locale/userLocale'))
+            locale.setlocale(
+                locale.LC_ALL,
+                QSettings().value('locale/userLocale')
+            )
         except:
             pass
 
@@ -248,7 +250,6 @@ class Cartogram:
         else:
             self.dialog.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
-
     def run(self):
         """Run method that performs all the real work"""
 
@@ -302,7 +303,7 @@ class Cartogram:
         result = self.dialog.exec_()
         # See if OK was pressed
         if result:
-            self.t=timeit.default_timer()
+            self.t = timeit.default_timer()
 
             self.inputLayer = self.dialog.layerComboBox.currentLayer()
             self.selectedFields = self.dialog.fieldListView.selectedFields()
@@ -391,7 +392,6 @@ class Cartogram:
     def stopWorker(self):
         self.worker.stopped = True
 
-
     def workerFinished(self):
         try:
             self.worker.deleteLater()
@@ -405,7 +405,6 @@ class Cartogram:
         self.iface.messageBar().popWidget(self.messageBarItem)
         self.t = timeit.default_timer() - self.t
         QgsMessageLog.logMessage("{}s".format(self.t))
-
 
     def workerCartogramComplete(
         self,
@@ -445,7 +444,6 @@ class Cartogram:
             QgsMessageLog.logMessage(
                 self.tr("cartogram3 computation cancelled by user")
             )
-
 
     def workerError(self, e, exceptionString):
         self.iface.messageBar().pushCritical(
@@ -513,7 +511,6 @@ class Cartogram:
         QgsProject.instance().addMapLayer(sampleLayer)
         del sampleDataset
 
-
     def createMemoryLayer(self, layerName, sourceLayer):
         # create empty memory layer
         memoryLayer = QgsVectorLayer(
@@ -526,11 +523,10 @@ class Cartogram:
         memoryLayerDataProvider = memoryLayer.dataProvider()
 
         # copy the table structure
-        memoryLayer.startEditing()
         memoryLayerDataProvider.addAttributes(
             sourceLayer.fields().toList()
         )
-        memoryLayer.commitChanges()
+        memoryLayer.updateFields()
 
         # copy the features
         memoryLayerDataProvider.addFeatures(
