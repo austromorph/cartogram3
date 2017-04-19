@@ -5,7 +5,7 @@ This plugin creates continous cartograms (a.k.a. anamorphic maps) from polygon l
 
 It is a port of the [cartogram plugin](https://plugins.qgis.org/plugins/cartogram/) of [Morten Wulff](https://github.com/informeren/qgis-cartogram) and [Carson Farmer](https://github.com/carsonfarmer/cartogram) to QGIS 3, Python 3 and PyQt5. It also features a few improvements, such as parallel processing (using `multiprocessing`), the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition in addition to the number of iterations.
 
-As its successors, this plugin implements the algorithm proposed by: 
+As its predecessors, this plugin implements the algorithm proposed by: 
 
 > Dougenik, J. A, N. R. Chrisman, and D. R. Niemeyer. 1985. "[An algorithm to construct continuous cartograms.](http://www.tandfonline.com/doi/abs/10.1111/j.0033-0124.1985.00075.x)" Professional Geographer 37:75-81 
 
