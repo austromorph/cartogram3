@@ -1,6 +1,7 @@
 Change Log 
 ==========
-
+* __2.99.4__ (2017-04-27):
+    * adapted to API changes in QGIS core (issue #12)
 * __2.99.3__ (2017-03-16):
 	* significant performance improvements for large datasets
 * __2.99.2__ (2017-02-20):

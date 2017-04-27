@@ -28,7 +28,7 @@ from PyQt5.QtCore import (
 from PyQt5.QtWidgets import (
     QListView
 )
-from qgis.gui import (
+from qgis.core import (
     QgsFieldModel,
     QgsFieldProxyModel
 )

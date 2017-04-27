@@ -48,6 +48,7 @@ from PyQt5.QtXml import (
 )
 
 from qgis.core import (
+    QgsFieldProxyModel,
     QgsMapLayer,
     QgsMapLayerProxyModel,
     QgsMessageLog,
@@ -56,7 +57,6 @@ from qgis.core import (
     QgsWkbTypes
 )
 from qgis.gui import (
-    QgsFieldProxyModel,
     QgsMessageBar
 )
 
