@@ -27,7 +27,7 @@ from PyQt5.QtCore import (
 from qgis.core import (
     QgsGeometry,
     QgsMessageLog,
-    QgsPointV2,
+    QgsPoint,
     QgsVectorLayer,
     QgsVertexId,
     QgsWkbTypes
@@ -294,7 +294,7 @@ class CartogramWorker(QObject):
             abstractGeometry = features[featureId].geometry().clone()
             abstractGeometry.moveVertex(
                 QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
-                QgsPointV2(x, y)
+                QgsPoint(x, y)
             )
             features[featureId].setGeometry(abstractGeometry)
 

@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __2.99.5__ (2017-06-14):
+    * adapted to API changes in QGIS core (issue #13)
 * __2.99.4__ (2017-04-27):
     * adapted to API changes in QGIS core (issue #12)
 * __2.99.3__ (2017-03-16):
