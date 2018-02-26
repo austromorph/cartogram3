@@ -242,7 +242,7 @@ class CartogramWorker(QObject):
                 for feature in self.layer.getFeatures()}
 
         for featureId in features:
-            abstractGeometry = features[featureId].geometry()
+            abstractGeometry = features[featureId].constGet()
             for p in range(abstractGeometry.partCount()):
                 for r in range(abstractGeometry.ringCount(p)):
                     for v in range(abstractGeometry.vertexCount(p, r) - 1):
@@ -291,12 +291,12 @@ class CartogramWorker(QObject):
                 else:
                     continue
 
-            abstractGeometry = features[featureId].geometry().clone()
+            abstractGeometry = features[featureId].constGet().clone()
             abstractGeometry.moveVertex(
                 QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
                 QgsPoint(x, y)
             )
-            features[featureId].setGeometry(abstractGeometry)
+            features[featureId].set(abstractGeometry)
 
         self.layer.dataProvider().changeGeometryValues(features)
         self.layer.reload()
