@@ -48,6 +48,7 @@ from PyQt5.QtXml import (
 )
 
 from qgis.core import (
+    Qgis,
     QgsFieldProxyModel,
     QgsMapLayer,
     QgsMapLayerProxyModel,
@@ -286,7 +287,7 @@ class Cartogram:
 
             self.iface.messageBar().pushWidget(
                 self.messageBarItem,
-                QgsMessageBar.CRITICAL
+                Qgis.Critical
             )
             return False
 
@@ -343,7 +344,7 @@ class Cartogram:
 
             self.iface.messageBar().pushWidget(
                 self.messageBarItem,
-                QgsMessageBar.INFO
+                Qgis.Info
             )
 
             self.updateProgressBar()
@@ -454,7 +455,7 @@ class Cartogram:
         )
         QgsMessageLog.logMessage(
             exceptionString,
-            level=QgsMessageLog.CRITICAL,
+            level=Qgis.Critical,
             tag="Plugins"
         )
 
