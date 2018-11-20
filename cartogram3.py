@@ -314,7 +314,7 @@ class Cartogram:
 
             # remember the input layer’s style
             self.inputLayerStyle = QDomDocument()
-            self.inputLayer.exportNamedStyle(self.inputLayerStyle, "")
+            self.inputLayer.exportNamedStyle(self.inputLayerStyle, None)
 
             # set up all widgets for status reporting
             self.progressBar = QProgressBar()
