@@ -314,7 +314,14 @@ class Cartogram:
 
             # remember the input layer’s style
             self.inputLayerStyle = QDomDocument()
-            self.inputLayer.exportNamedStyle(self.inputLayerStyle)
+            # QgsMapLayer.exportNamedStyle() changed its signature
+            # between QGIS 3.2 and 3.4, for now, support both
+            try:
+                # >=3.4
+                self.inputLayer.exportNamedStyle(self.inputLayerStyle)
+            except TypeError:
+                # <=3.2
+                self.inputLayer.exportNamedStyle(self.inputLayerStyle, None)
 
             # set up all widgets for status reporting
             self.progressBar = QProgressBar()
