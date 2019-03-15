@@ -3,7 +3,7 @@ name=cartogram3
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.99
 description=Generate anamorphic maps
-version=3.0.2
+version=3.0.3
 author=Christoph Fink
 email=morph@austromorph.space
 
@@ -15,6 +15,8 @@ tracker=https://github.com/austromorph/cartogram3/issues
 repository=https://github.com/austromorph/cartogram3
 
 changelog=
+    3.0.3 (2019-03-15):
+        - bug fix: hide input layer after computation
     3.0.2 (2018-11-26):
         - bug fix: regression introduced in 3.0.1 for older versions (issue #19)
     3.0.1 (2018-11-21):

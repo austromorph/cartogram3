@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __3.0.3__ (2019-03-15):
+    * bug fix: hide input layer after computation
 * __3.0.2__ (2018-11-26):
     * bug fix: regression introduced in 3.0.1 for older versions (issue #19)
 * __3.0.1__ (2018-11-21):
