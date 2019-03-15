@@ -412,7 +412,6 @@ class Cartogram:
 
         self.iface.messageBar().popWidget(self.messageBarItem)
         self.t = timeit.default_timer() - self.t
-        QgsMessageLog.logMessage("{}s".format(self.t))
 
     def workerCartogramComplete(
         self,
@@ -422,17 +421,28 @@ class Cartogram:
         avgError=None
     ):
         if layer is not None:
-            # try to update the style xml before applying it,
+            # try to update the style xml before applying it
+            # (QgsMapLayer.exportNamedStyle() changed its signature
+            # between QGIS 3.2 and 3.4, for now, support both)
+            try:
+                # >=3.4
+                self.inputLayer.exportNamedStyle(self.inputLayerStyle)
+            except TypeError:
+                # <=3.2
+                self.inputLayer.exportNamedStyle(self.inputLayerStyle, None)
+            layer.importNamedStyle(self.inputLayerStyle)
+
             # hide input layer
             try:
-                self.inputLayer.exportNamedStyle(self.inputLayerStyle, "")
                 QgsProject.instance().layerTreeRoot() \
                     .findLayer(self.inputLayer) \
                     .setItemVisibilityChecked(False)
             except Exception as e:
-                QgsMessageLog.logMessage(repr(e))
-                pass
-            layer.importNamedStyle(self.inputLayerStyle)
+                QgsMessageLog.logMessage(
+                    repr(e),
+                    "Plugins",
+                    Qgis.Warning
+                )
 
             # add the layer to the project
             QgsProject.instance().addMapLayer(layer)
@@ -446,12 +456,16 @@ class Cartogram:
                             iterations=iterations,
                             avgError=avgError * 100,
                             fieldName=fieldName
-                )
+                ),
+                "Plugins",
+                Qgis.Info
             )
         else:
             QgsMessageLog.logMessage(
                 self.tr("cartogram3 computation cancelled by user")
-            )
+            ),
+            "Plugins",
+            Qgis.Info
 
     def workerError(self, e, exceptionString):
         self.iface.messageBar().pushCritical(
@@ -462,8 +476,8 @@ class Cartogram:
         )
         QgsMessageLog.logMessage(
             exceptionString,
-            level=Qgis.Critical,
-            tag="Plugins"
+            "Plugins",
+            Qgis.Critical
         )
 
         # empty the job queue
