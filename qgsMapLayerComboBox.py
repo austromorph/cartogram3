@@ -47,7 +47,7 @@ class QgsMapLayerComboBox(QComboBox):
     layerChanged = pyqtSignal("QgsMapLayer*")
 
     def setFilters(self, filters):
-            self.mProxyModel.setFilters(filters)
+        self.mProxyModel.setFilters(filters)
 
     def setExcludedProviders(self, providers):
         self.mProxyModel.setExcludedProviders(providers)

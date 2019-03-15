@@ -26,7 +26,6 @@ from PyQt5.QtCore import (
 
 from qgis.core import (
     QgsGeometry,
-    QgsMessageLog,
     QgsPoint,
     QgsVectorLayer,
     QgsVertexId,
@@ -179,7 +178,7 @@ class CartogramWorker(QObject):
         totalValue = sum([metaFeature.value for metaFeature in metaFeatures])
 
         areaValueRatio = totalArea / totalValue
-        #_metafeat
+        # _metafeat
 
         # mp.map!!!
         totalError = sum([
@@ -218,7 +217,7 @@ class CartogramWorker(QObject):
         return metaFeature.sizeError
 
     def transformFeatures(self):
-        inQueue  = multiprocessing.Queue()
+        inQueue = multiprocessing.Queue()
         outQueue = multiprocessing.Queue()
 
         threads = []
@@ -339,19 +338,19 @@ def transformPoint(metaFeatures, reductionFactor, inQueue, outQueue):
         outQueue.put((vertexId, (x, y)))
 
 
-#def metaFeatureError(areaValueRatio, metaFeature):
-#    desiredArea = metaFeature.value * areaValueRatio
-#    if desiredArea <= 0:
-#        metaFeature.mass = 0.0
-#    else:
-#        metaFeature.mass = \
-#            math.sqrt(desiredArea / math.pi) - metaFeature.radius
+# def metaFeatureError(areaValueRatio, metaFeature):
+#     desiredArea = metaFeature.value * areaValueRatio
+#     if desiredArea <= 0:
+#         metaFeature.mass = 0.0
+#     else:
+#         metaFeature.mass = \
+#             math.sqrt(desiredArea / math.pi) - metaFeature.radius
 #
-#    metaFeature.sizeError = \
-#        max(metaFeature.area, desiredArea) / \
-#        min(metaFeature.area, desiredArea)
+#     metaFeature.sizeError = \
+#         max(metaFeature.area, desiredArea) / \
+#         min(metaFeature.area, desiredArea)
 #
-#    return metaFeature
+#     return metaFeature
 
 
 class CartogramMetaFeature(object):

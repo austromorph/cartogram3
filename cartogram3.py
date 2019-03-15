@@ -57,9 +57,6 @@ from qgis.core import (
     QgsVectorLayer,
     QgsWkbTypes
 )
-from qgis.gui import (
-    QgsMessageBar
-)
 
 from .cartogram_dialog import CartogramDialog
 from .cartogram_worker import CartogramWorker
@@ -99,7 +96,7 @@ class Cartogram:
                 locale.LC_ALL,
                 QSettings().value('locale/userLocale')
             )
-        except:
+        except:  # noqa: E722
             pass
 
         # Create the dialog (after translation) and keep reference
@@ -243,7 +240,7 @@ class Cartogram:
     def validateInputs(self, unusedArgumentToMatchQtSignal=0):
         try:
             workersRunning = not self.jobs.empty()
-        except:
+        except:  # noqa: E722
             workersRunning = False
         if (workersRunning or
                 len(self.dialog.fieldListView.selectedFields()) < 1):
@@ -362,7 +359,7 @@ class Cartogram:
     def updateStatusMessage(self, message=""):
         try:
             self.statusMessageLabel.setText("cartogram3: " + message)
-        except:
+        except:  # noqa: E722
             pass
 
     def updateProgressBar(self, increase=1):
@@ -370,7 +367,7 @@ class Cartogram:
             self.progressBar.setValue(
                 self.progressBar.value() + increase
             )
-        except:
+        except:  # noqa: E722
             pass
 
     def startWorker(self):
@@ -403,7 +400,7 @@ class Cartogram:
     def workerFinished(self):
         try:
             self.worker.deleteLater()
-        except:
+        except:  # noqa: E722
             pass
         self.thread.quit()
         self.thread.wait()
@@ -489,7 +486,7 @@ class Cartogram:
             self.iface.messageBar().popWidget(
                 self.messageBarItem
             )
-        except:
+        except:  # noqa: E722
             pass
 
         sampleDataset = QgsVectorLayer(
