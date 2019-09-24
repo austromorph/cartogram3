@@ -295,7 +295,7 @@ class CartogramWorker(QObject):
                 QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
                 QgsPoint(x, y)
             )
-            features[featureId].set(abstractGeometry)
+            features[featureId] = QgsGeometry(abstractGeometry)
 
         self.layer.dataProvider().changeGeometryValues(features)
         self.layer.reload()

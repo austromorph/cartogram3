@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __3.0.4__ (2019-09-24):
+    * fix pending deprecation: `QgsGeometry().set()` marked as deprecated
 * __3.0.3__ (2019-03-15):
     * bug fix: hide input layer after computation
 * __3.0.2__ (2018-11-26):
