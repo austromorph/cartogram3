@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #   creates a zip archive suitable for upload to plugins.qgis.org 
-#   the plugin is assumed to be in the same directory as this script, 
+#   supply the path to the plugin as the first command line argument
 #   the resulting zip is saved to the current working directory.
 
-pluginDir="$(realpath "$(dirname ${0})")"
+pluginDir="$(realpath "$(dirname ${1})")"
 outputDir="$(pwd)"
 
 if [[ -f "${pluginDir}/metadata.txt" ]]; then
@@ -21,7 +21,7 @@ cd "${pluginDir}"/..
 
 zip \
 	-9 \
-	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "${pluginDir}")/$(basename "$0")" \
+	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "${pluginDir}")/helpers/$(basename "$0")" \
 	-r \
 	"${outputDir}/${pluginName}-${pluginVersion}.zip" \
  	"$(basename "${pluginDir}")"
