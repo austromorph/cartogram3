@@ -242,21 +242,21 @@ class CartogramWorker(QObject):
 
         for featureId in features:
             abstractGeometry = features[featureId].constGet()
-            for p in range(abstractGeometry.partCount()):
-                for r in range(abstractGeometry.ringCount(p)):
-                    for v in range(abstractGeometry.vertexCount(p, r) - 1):
+            for part in range(abstractGeometry.partCount()):
+                for ring in range(abstractGeometry.ringCount(part)):
+                    for vertex in range(abstractGeometry.vertexCount(part, ring) - 1):
                         # -1 because the last one is the first one again
                         vertexId = \
-                            QgsVertexId(p, r, v, QgsVertexId.SegmentVertex)
+                            QgsVertexId(part, ring, vertex, QgsVertexId.SegmentVertex)
                         if not vertexId.isValid():
                             vertexId = QgsVertexId(
-                                p, r, v, QgsVertexId.CurveVertex
+                                part, ring, vertex, QgsVertexId.CurveVertex
                             )
                             if not vertexId.isValid():
                                 continue
                         point = abstractGeometry.vertexAt(vertexId)
                         inQueue.put(
-                            ((featureId, p, r, v), (point.x(), point.y()))
+                            ((featureId, part, ring, vertex), (point.x(), point.y()))
                         )
             self.progress.emit(1)
 
@@ -267,22 +267,22 @@ class CartogramWorker(QObject):
             if self.stopped:
                 # clean inQueue
                 while True:
-                    (f, g) = inQueue.get()
-                    if f is None:
+                    (featureId, *_) = inQueue.get()
+                    if featureId is None:
                         break
 
                 # put some more death pills so everybody gets one
-                for i in range(numThreads):
+                for _ in range(numThreads):
                     inQueue.put((None, (None, None)))
 
                 # wait for the children to die
-                for p in threads:
-                    p.join()
+                for t in threads:
+                    t.join()
 
                 # give up ourselves (main thread)
                 break
 
-            ((featureId, p, r, v), (x, y)) = outQueue.get()
+            ((featureId, part, ring, vertex), (x, y)) = outQueue.get()
             if featureId is None:
                 numThreads -= 1
                 if numThreads == 0:
@@ -292,7 +292,7 @@ class CartogramWorker(QObject):
 
             abstractGeometry = features[featureId].constGet().clone()
             abstractGeometry.moveVertex(
-                QgsVertexId(p, r, v, QgsVertexId.SegmentVertex),
+                QgsVertexId(part, ring, vertex, QgsVertexId.SegmentVertex),
                 QgsPoint(x, y)
             )
             features[featureId] = QgsGeometry(abstractGeometry)
