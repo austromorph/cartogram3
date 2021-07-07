@@ -58,7 +58,7 @@ from qgis.core import (
     QgsWkbTypes
 )
 
-from .cartogram_dialog import CartogramDialog
+from .ui import CartogramDialog
 from .cartogram_worker import CartogramWorker
 
 

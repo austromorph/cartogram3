@@ -26,21 +26,20 @@ import os
 from PyQt5 import uic
 from PyQt5 import QtWidgets
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'cartogram_dialog.ui'), True)
+
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(
+        os.path.dirname(__file__),
+        "cartogram_dialog.ui"
+    ),
+    from_imports=True
+)
 
 
 class CartogramDialog(QtWidgets.QDialog, FORM_CLASS):
+    """Main dialog for the cartogram3 plugin."""
+
     def __init__(self, parent=None):
-        """Constructor."""
+        """Initialise a CartogramDialog."""
         super(CartogramDialog, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use autoconnect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
-
-
-if __name__ == '__main__':
-    pass

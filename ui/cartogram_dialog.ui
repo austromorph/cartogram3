@@ -123,12 +123,12 @@
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>cartogram3.qgsMapLayerComboBox</header>
+   <header>.qgsmaplayercombobox</header>
   </customwidget>
   <customwidget>
    <class>QgsFieldListView</class>
    <extends>QListView</extends>
-   <header>cartogram3.qgsFieldListView</header>
+   <header>cartogram3.ui.qgsfieldlistview</header>
   </customwidget>
  </customwidgets>
  <resources/>
