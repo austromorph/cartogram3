@@ -209,7 +209,6 @@ class Cartogram:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
         self.toolbar = self.iface.addToolBar("Compute cartogram")
         self.toolbar.setObjectName("Cartogram")
 
@@ -228,7 +227,7 @@ class Cartogram:
             parent=self.iface.mainWindow())
 
     def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
+        """Remove the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
                 self.menu,
