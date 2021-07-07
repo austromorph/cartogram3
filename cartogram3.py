@@ -59,7 +59,7 @@ from qgis.core import (
 )
 
 from .ui import CartogramDialog
-from .cartogram_worker import CartogramWorker
+from .workers import CartogramWorker
 
 
 class Cartogram:
