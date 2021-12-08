@@ -1,18 +1,26 @@
 [general]
 name=cartogram3
-qgisMinimumVersion=2.99
-qgisMaximumVersion=3.99
-description=Generate anamorphic maps
 version=3.0.4
-author=Christoph Fink
-email=morph@austromorph.space
 
+category=Vector
+tags=geometry, layers, polygon, shapefile
+
+description=Generate anamorphic maps
 about=This plugin creates continous cartograms (a.k.a. anamorphic maps) from polygon layers. 
 
-    It is a port of the QGIS 2.x cartogram plugin by Morten Wulff and Carson Farmer to QGIS 3, Python 3 and PyQt5. Features include parallel processing, the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition. 
+    It is a port of the QGIS 2.x cartogram plugin by Morten Wulff and Carson Farmer to QGIS 3, Python 3 and PyQt5. Features include parallel processing, the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition.  
 
+homepage=https://github.com/austromorph/cartogram3
 tracker=https://github.com/austromorph/cartogram3/issues
 repository=https://github.com/austromorph/cartogram3
+
+author=Christoph Fink
+email=christoph@christophfink.com
+
+icon=img/icon.png
+
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.99
 
 changelog=
     3.0.4 (2019-09-24):
@@ -38,12 +46,6 @@ changelog=
         – added German, Spanish & Danish translation
     2.99.0 (2017-02-17): 
         – initial release
-
-tags=geometry, layers, polygon, shapefile
-
-homepage=https://github.com/austromorph/cartogram3
-category=Vector
-icon=img/icon.png
 
 experimental=False
 deprecated=False
