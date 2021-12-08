@@ -19,7 +19,7 @@ import platform
 import sys
 import traceback
 
-from PyQt5.QtCore import (
+from qgis.PyQt.QtCore import (
     pyqtSignal,
     QObject
 )

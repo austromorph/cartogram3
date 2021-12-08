@@ -25,7 +25,7 @@ import locale
 import queue
 import timeit
 
-from PyQt5.QtCore import (
+from qgis.PyQt.QtCore import (
     QSettings,
     QTranslator,
     qVersion,
@@ -33,22 +33,23 @@ from PyQt5.QtCore import (
     Qt,
     QThread
 )
-from PyQt5.QtGui import (
+from qgis.PyQt.QtGui import (
     QIcon
 )
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QAction,
     QDialogButtonBox,
     QLabel,
     QPushButton,
     QProgressBar
 )
-from PyQt5.QtXml import (
+from qgis.PyQt.QtXml import (
     QDomDocument
 )
 
 from qgis.core import (
     Qgis,
+    QgsApplication,
     QgsFieldProxyModel,
     QgsMapLayer,
     QgsMapLayerProxyModel,
@@ -58,6 +59,7 @@ from qgis.core import (
     QgsWkbTypes
 )
 
+from .cartogramprocessingprovider import CartogramProcessingProvider
 from .ui import CartogramDialog
 from .workers import CartogramWorker
 
@@ -226,6 +228,12 @@ class Cartogram:
             add_to_toolbar=False,
             parent=self.iface.mainWindow())
 
+        self.initProcessing()
+
+    def initProcessing(self):
+        self.provider = CartogramProcessingProvider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
     def unload(self):
         """Remove the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -235,6 +243,7 @@ class Cartogram:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
+        QgsApplication.processingRegistry().removeProvider(self.provider)
 
     def validateInputs(self, unusedArgumentToMatchQtSignal=0):
         try:
