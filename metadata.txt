@@ -10,9 +10,8 @@ about=This plugin creates continous cartograms (a.k.a. anamorphic maps) from pol
 
     It is a port of the QGIS 2.x cartogram plugin by Morten Wulff and Carson Farmer to QGIS 3, Python 3 and PyQt5. Features include parallel processing, the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition.  
 
-homepage=https://github.com/austromorph/cartogram3
-tracker=https://github.com/austromorph/cartogram3/issues
 repository=https://github.com/austromorph/cartogram3
+tracker=https://github.com/austromorph/cartogram3/issues
 
 author=Christoph Fink
 email=christoph@christophfink.com
