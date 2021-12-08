@@ -102,8 +102,10 @@ class CartogramWorker(QObject):
                         self.getReductionFactor()
 
                     # stop conditions met?
-                    if (iterations >= self.maxIterations or
-                            averageError <= self.maxAverageError):
+                    if (
+                            iterations >= self.maxIterations
+                            or averageError <= self.maxAverageError
+                    ):
                         # return the layer
                         self.cartogramComplete.emit(
                             self.layer,
@@ -114,8 +116,8 @@ class CartogramWorker(QObject):
                         # also, fast-forward the progress bar
                         # in case we skipped iterations
                         self.progress.emit(
-                                self.numFeatures *
-                                (self.maxIterations - iterations)
+                            self.numFeatures
+                            * (self.maxIterations - iterations)
                         )
                         # and finally, break out of the loop
                         break
@@ -145,9 +147,9 @@ class CartogramWorker(QObject):
     def createMemoryLayer(self, layerName, sourceLayer):
         # create empty memory layer
         memoryLayer = QgsVectorLayer(
-            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType()) +
-            "?crs=" + sourceLayer.crs().authid() +
-            "&index=yes",
+            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType())
+            + "?crs=" + sourceLayer.crs().authid()
+            + "&index=yes",
             layerName,
             "memory"
         )

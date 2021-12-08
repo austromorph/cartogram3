@@ -241,8 +241,10 @@ class Cartogram:
             workersRunning = not self.jobs.empty()
         except:  # noqa: E722
             workersRunning = False
-        if (workersRunning or
-                len(self.dialog.fieldListView.selectedFields()) < 1):
+        if (
+                workersRunning
+                or len(self.dialog.fieldListView.selectedFields()) < 1
+        ):
             self.dialog.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
         else:
             self.dialog.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
@@ -251,16 +253,20 @@ class Cartogram:
         """Run method that performs all the real work"""
 
         # check whether we have at least once polygon vector layer
-        if len(
-            [name for name, layer in QgsProject.instance().mapLayers().items()
-                if layer.type() == QgsMapLayer.VectorLayer and
-                layer.geometryType() == QgsWkbTypes.PolygonGeometry]
-        ) < 1:
+        if [
+                name for name, layer in QgsProject.instance().mapLayers().items()
+                if (
+                    layer.type() == QgsMapLayer.VectorLayer
+                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                )
+        ]:
             # otherwise display an error message and offer to add
             # a sample dataset
             errorMessageLabel = QLabel(
-                self.tr("You need at least one polygon vector layer " +
-                        "to create a cartogram.")
+                self.tr(
+                    "You need at least one polygon vector layer "
+                    + "to create a cartogram."
+                )
             )
             errorMessageLabel.setAlignment(
                 Qt.AlignLeft | Qt.AlignVCenter
@@ -323,10 +329,10 @@ class Cartogram:
             self.progressBar = QProgressBar()
             self.progressBar.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.progressBar.setMaximum(
-                len(self.selectedFields) *
-                self.maxIterations *
-                len(list(self.inputLayer.getFeatures())) +
-                1
+                len(self.selectedFields)
+                * self.maxIterations
+                * len(list(self.inputLayer.getFeatures()))
+                + 1
             )
 
             self.statusMessageLabel = QLabel("")
@@ -445,13 +451,15 @@ class Cartogram:
 
             avgError -= 1
             QgsMessageLog.logMessage(
-                self.tr("cartogram3 successfully finished computing a " +
-                        "cartogram for field ‘{fieldName}’ after " +
-                        "{iterations} iterations with {avgError:.2n}% " +
-                        "average error remaining.").format(
-                            iterations=iterations,
-                            avgError=avgError * 100,
-                            fieldName=fieldName
+                self.tr(
+                    "cartogram3 successfully finished computing a "
+                    + "cartogram for field ‘{fieldName}’ after "
+                    + "{iterations} iterations with {avgError:.2n}% "
+                    + "average error remaining."
+                ).format(
+                    iterations=iterations,
+                    avgError=(avgError * 100),
+                    fieldName=fieldName
                 ),
                 "Plugins",
                 Qgis.Info
@@ -466,9 +474,11 @@ class Cartogram:
     def workerError(self, e, exceptionString):
         self.iface.messageBar().pushCritical(
             self.tr("Error"),
-            self.tr("An error occurred during cartogram creation. " +
-                    "Please see the “Plugins” section of the message " +
-                    "log for details.")
+            self.tr(
+                "An error occurred during cartogram creation. "
+                + "Please see the “Plugins” section of the message "
+                + "log for details."
+            )
         )
         QgsMessageLog.logMessage(
             exceptionString,
@@ -510,20 +520,19 @@ class Cartogram:
             )
         )
 
-        sampleLayer.setTitle(
-                "Austria: Population by NUTS2 regions, 1 Jan 2017")
+        sampleLayer.setTitle("Austria: Population by NUTS2 regions, 1 Jan 2017")
         sampleLayer.setShortName("Austria_Population_NUTS2_20170101")
         sampleLayer.setAbstract(
-            "Austria’s population by NUTS2 region, as of 1 Jan 2017 \n" +
-            "\n" +
-            "Data sources: \n" +
-            "    http://ec.europa.eu/eurostat/web/gisco/geodata/" +
-            "reference-data/administrative-units-statistical-units/" +
-            "nuts#nuts13 \n" +
-            "    http://www.statistik.at/web_de/statistiken/" +
-            "menschen_und_gesellschaft/bevoelkerung/" +
-            "bevoelkerungsstand_und_veraenderung/" +
-            "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
+            "Austria’s population by NUTS2 region, as of 1 Jan 2017 \n"
+            + "\n"
+            + "Data sources: \n"
+            + "    http://ec.europa.eu/eurostat/web/gisco/geodata/"
+            + "reference-data/administrative-units-statistical-units/"
+            + "nuts#nuts13 \n"
+            + "    http://www.statistik.at/web_de/statistiken/"
+            + "menschen_und_gesellschaft/bevoelkerung/"
+            + "bevoelkerungsstand_und_veraenderung/"
+            + "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
         )
 
         QgsProject.instance().addMapLayer(sampleLayer)
@@ -532,9 +541,9 @@ class Cartogram:
     def createMemoryLayer(self, layerName, sourceLayer):
         # create empty memory layer
         memoryLayer = QgsVectorLayer(
-            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType()) +
-            "?crs=" + sourceLayer.crs().authid() +
-            "&index=yes",
+            QgsWkbTypes.geometryDisplayString(sourceLayer.geometryType())
+            + "?crs=" + sourceLayer.crs().authid()
+            + "&index=yes",
             layerName,
             "memory"
         )
