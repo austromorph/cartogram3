@@ -43,7 +43,7 @@ tags=geometry, layers, polygon, shapefile
 
 homepage=https://github.com/austromorph/cartogram3
 category=Vector
-icon=data/icon.png
+icon=img/icon.png
 
 experimental=False
 deprecated=False

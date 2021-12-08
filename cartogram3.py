@@ -212,7 +212,7 @@ class Cartogram:
         self.toolbar = self.iface.addToolBar("Compute cartogram")
         self.toolbar.setObjectName("Cartogram")
 
-        icon_path = os.path.join(self.plugin_dir, "data", "icon.png")
+        icon_path = os.path.join(self.plugin_dir, "img", "icon.png")
         self.add_action(
             icon_path,
             text=self.tr("Compute cartogram"),
