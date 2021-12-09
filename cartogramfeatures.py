@@ -9,6 +9,8 @@ import itertools
 import math
 import multiprocessing
 
+from qgis.core import QgsGeometry
+
 from .cartogramfeature import CartogramFeature
 
 
@@ -20,13 +22,17 @@ class CartogramFeatures:
         self._layer = None  # not yet really kosher - in some cases, we remember the input layer
         self.workers = multiprocessing.get_context("spawn").Pool()
 
+    def __del__(self):
+        """Take care of the worker pool upon unloading."""
+        self.workers.close()
+        del self.workers
+
     # next two methods not alphabetical order, because they’re
     # instantiator and data output
 
     @staticmethod
     def from_polygon_layer(layer, field_name):
         cartogram_features = CartogramFeatures()
-        cartogram_features._layer = layer
         crs = layer.sourceCrs().toProj()
         for feature in layer.getFeatures():
             feature_id = feature.id()
@@ -39,28 +45,32 @@ class CartogramFeatures:
             cartogram_features[feature_id] = cartogram_feature
         return cartogram_features
 
-    def copy_geometries_back_to_layer(self):
-        if not self._layer:
-            raise NotImplementedError(
-                "`copy_geometries_back_to_layer()` only works on instances "
-                + "created with `from_polygon_layer()`"
-            )
-        for feature in self._layer.getFeatures():
-            feature_id = feature.id()
-            feature.geometry().set(self[feature_id].geometry)
+    def copy_geometries_back_to_layer(self, layer):
+        # this MUST be the same layer as used for `from_polygon_layer`
+        layer.startEditing()
+        for feature in self.features:
+            layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
+        layer.commitChanges()
 
     def __setitem__(self, feature_id, cartogram_feature):
         self._features[feature_id] = cartogram_feature
 
-    def __getitem(self, feature_id):
+    def __getitem__(self, feature_id):
         return self._features[feature_id]
 
     def __iter__(self):
         return self.values()
 
+    def __len__(self):
+        return len(self._features)
+
     @property
     def average_error(self):
-        return self.total_value / len(self._features)
+        return self.total_error / len(self)
+
+    @property
+    def features(self):
+        return self.values()
 
     def keys(self):
         for feature_id in self._features:
@@ -126,17 +136,21 @@ class CartogramFeatures:
                 CartogramFeatures.transformVertex,
                 zip(
                     self.vertices,
-                    itertools.repeat(self._features),
+                    itertools.repeat(list(self.features)),
                     itertools.repeat(reduction_factor)
                 )
             )
 
             for feature_id, part, ring, vertex, point in transformed_vertices:
-                self[feature_id].vertices[part][ring][vertex] = point
+                self[feature_id].vertices[part, ring, vertex] = point
 
-            # invalidate the geometries of all features, so they’re recomputed
+            # invalidate the geometries of all features, so they’re reconstructed
+            # from the changed set of vertices
             for feature in self:
-                del feature._wkt
+                try:
+                    del feature._wkt
+                except AttributeError:
+                    pass
 
             iteration += 1
             average_error = self.average_error
@@ -156,7 +170,7 @@ class CartogramFeatures:
                 distance = math.sqrt((x0 - cx) ** 2 + (y0 - cy) ** 2)
 
                 if distance > feature.radius:
-                    # force in points ‘far away’ from the centroid
+                    # force on points ‘far away’ from the centroid
                     force = feature.mass * feature.radius / distance
                 else:
                     # force on points closer to the centroid
@@ -170,6 +184,5 @@ class CartogramFeatures:
         return feature_id, part, ring, vertex, (x, y)
 
 
-# bloody helper function, TODO: this has to change to something better
 def _getattr(obj, name):
     return getattr(obj, name)

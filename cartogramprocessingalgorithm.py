@@ -3,8 +3,8 @@
 
 """Provide a cartogram algorithm to the processing toolbox."""
 
+from qgis import processing
 from qgis.PyQt.QtCore import QCoreApplication
-
 from qgis.core import (
     QgsFeatureSink,
     QgsProcessing,
@@ -136,10 +136,22 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
         cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name)
         cartogram_features.transform()
-        cartogram_features.copy_geometries_back_to_layer()
+        cartogram_features.copy_geometries_back_to_layer(memory_layer)
+
+        # We are sometimes left with slithers and polygons misshaped in other ways,
+        # a zero-buffer around them works well
+        buffered_layer = processing.run(
+            "native:buffer", {
+                'INPUT': memory_layer,
+                'DISTANCE': 10.0,
+                'OUTPUT': 'memory:'
+            },
+            context=context,
+            feedback=feedback
+        )['OUTPUT']
 
         # finally, copy features to the output sink
-        for feature in memory_layer.getFeatures():
+        for feature in buffered_layer.getFeatures():
             output_layer.addFeature(feature, QgsFeatureSink.FastInsert)
 
         return {self.OUTPUT_LAYER: output_layer_id}

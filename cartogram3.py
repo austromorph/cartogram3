@@ -20,9 +20,9 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os.path
+import functools
 import locale
-import queue
+import os.path
 import timeit
 
 from qgis.PyQt.QtCore import (
@@ -31,7 +31,6 @@ from qgis.PyQt.QtCore import (
     qVersion,
     QCoreApplication,
     Qt,
-    QThread
 )
 from qgis.PyQt.QtGui import (
     QIcon
@@ -54,6 +53,9 @@ from qgis.core import (
     QgsMapLayer,
     QgsMapLayerProxyModel,
     QgsMessageLog,
+    QgsProcessingAlgRunnerTask,
+    QgsProcessingContext,
+    QgsProcessingFeedback,
     QgsProject,
     QgsVectorLayer,
     QgsWkbTypes
@@ -61,7 +63,6 @@ from qgis.core import (
 
 from .cartogramprocessingprovider import CartogramProcessingProvider
 from .ui import CartogramDialog
-from .workers import CartogramWorker
 
 
 class Cartogram:
@@ -261,8 +262,18 @@ class Cartogram:
     def run(self):
         """Run method that performs all the real work"""
 
+        QgsMessageLog.logMessage(
+            ", ".join([
+                name for name, layer in QgsProject.instance().mapLayers().items()
+                if (
+                    layer.type() == QgsMapLayer.VectorLayer
+                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                )
+            ]),
+            "cartogram3"
+        )
         # check whether we have at least once polygon vector layer
-        if [
+        if not [
                 name for name, layer in QgsProject.instance().mapLayers().items()
                 if (
                     layer.type() == QgsMapLayer.VectorLayer
@@ -337,26 +348,21 @@ class Cartogram:
             # set up all widgets for status reporting
             self.progressBar = QProgressBar()
             self.progressBar.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            self.progressBar.setMaximum(
-                len(self.selectedFields)
-                * self.maxIterations
-                * len(list(self.inputLayer.getFeatures()))
-                + 1
-            )
+            self.progressBar.setMaximum(0)
 
             self.statusMessageLabel = QLabel("")
             self.statusMessageLabel.setAlignment(
                 Qt.AlignLeft | Qt.AlignVCenter
             )
 
-            cancelButton = QPushButton(self.tr("Cancel"))
-            cancelButton.clicked.connect(self.stopWorker)
+            #cancelButton = QPushButton(self.tr("Cancel"))
+            #cancelButton.clicked.connect(self.stopWorker)
 
             self.messageBarItem = self.iface.messageBar().createMessage("")
             for widget in [
                 self.statusMessageLabel,
                 self.progressBar,
-                cancelButton
+                #cancelButton
             ]:
                 self.messageBarItem.layout().addWidget(widget)
 
@@ -365,10 +371,8 @@ class Cartogram:
                 Qgis.Info
             )
 
-            self.updateProgressBar()
             self.updateStatusMessage("starting")
-
-            self.startWorker()
+            self.start_task()
 
     def updateStatusMessage(self, message=""):
         try:
@@ -376,128 +380,60 @@ class Cartogram:
         except:  # noqa: E722
             pass
 
-    def updateProgressBar(self, increase=1):
-        try:
-            self.progressBar.setValue(
-                self.progressBar.value() + increase
-            )
-        except:  # noqa: E722
-            pass
-
-    def startWorker(self):
-        worker = CartogramWorker(
-            self.inputLayer,
-            self.selectedFields,
-            self.maxIterations,
-            self.maxAverageError,
-            self.tr
+    def start_task(self):
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        task = QgsProcessingAlgRunnerTask(
+            QgsApplication.processingRegistry().algorithmById("cartogram3:compute_cartogram"),
+            {
+                "INPUT_LAYER": self.inputLayer,
+                "INPUT_LAYER_FIELD": self.selectedFields[0],
+                "MAX_ITERATIONS": self.maxIterations,
+                "MAX_AVERAGE_ERROR": self.maxAverageError
+            },
+            context,
+            feedback
         )
-        thread = QThread()
-        worker.moveToThread(thread)
+        task.executed.connect(functools.partial(self.task_finished, context))
+        QgsApplication.taskManager().addTask(task)
 
-        # connecting signals+slots
-        worker.finished.connect(self.workerFinished)
-        worker.cartogramComplete.connect(self.workerCartogramComplete)
-        worker.error.connect(self.workerError)
-        worker.progress.connect(self.updateProgressBar)
-        worker.status.connect(self.updateStatusMessage)
+    def task_finished(self, context, successful, results):
+        if successful:
+            output_layer = context.getMapLayer(results["OUTPUT_LAYER"])
+            if output_layer and output_layer.isValid():
+                layer = context.takeResultLayer(output_layer.id())
 
-        thread.started.connect(worker.run)
-        thread.start()
+                # try to update the style xml before applying it
+                # (QgsMapLayer.exportNamedStyle() changed its signature
+                # between QGIS 3.2 and 3.4, for now, support both)
+                try:
+                    # >=3.4
+                    self.inputLayer.exportNamedStyle(self.inputLayerStyle)
+                except TypeError:
+                    # <=3.2
+                    self.inputLayer.exportNamedStyle(self.inputLayerStyle, None)
+                layer.importNamedStyle(self.inputLayerStyle)
 
-        self.worker = worker
-        self.thread = thread
+                # hide input layer
+                try:
+                    QgsProject.instance().layerTreeRoot() \
+                        .findLayer(self.inputLayer) \
+                        .setItemVisibilityChecked(False)
+                except Exception as e:
+                    QgsMessageLog.logMessage(
+                        repr(e),
+                        "Plugins",
+                        Qgis.Warning
+                    )
 
-    def stopWorker(self):
-        self.worker.stopped = True
+                # add the layer to the project
+                QgsProject.instance().addMapLayer(layer)
 
-    def workerFinished(self):
-        try:
-            self.worker.deleteLater()
-        except:  # noqa: E722
-            pass
-        self.thread.quit()
-        self.thread.wait()
-        self.thread.terminate()
-        self.thread.deleteLater()
+        else:
+            QgsMessageLog.logMessage("Failed to compute cartogram", "cartogram3")
 
         self.iface.messageBar().popWidget(self.messageBarItem)
         self.t = timeit.default_timer() - self.t
-
-    def workerCartogramComplete(
-        self,
-        layer=None,
-        fieldName=None,
-        iterations=None,
-        avgError=None
-    ):
-        if layer is not None:
-            # try to update the style xml before applying it
-            # (QgsMapLayer.exportNamedStyle() changed its signature
-            # between QGIS 3.2 and 3.4, for now, support both)
-            try:
-                # >=3.4
-                self.inputLayer.exportNamedStyle(self.inputLayerStyle)
-            except TypeError:
-                # <=3.2
-                self.inputLayer.exportNamedStyle(self.inputLayerStyle, None)
-            layer.importNamedStyle(self.inputLayerStyle)
-
-            # hide input layer
-            try:
-                QgsProject.instance().layerTreeRoot() \
-                    .findLayer(self.inputLayer) \
-                    .setItemVisibilityChecked(False)
-            except Exception as e:
-                QgsMessageLog.logMessage(
-                    repr(e),
-                    "Plugins",
-                    Qgis.Warning
-                )
-
-            # add the layer to the project
-            QgsProject.instance().addMapLayer(layer)
-
-            avgError -= 1
-            QgsMessageLog.logMessage(
-                self.tr(
-                    "cartogram3 successfully finished computing a "
-                    + "cartogram for field ‘{fieldName}’ after "
-                    + "{iterations} iterations with {avgError:.2n}% "
-                    + "average error remaining."
-                ).format(
-                    iterations=iterations,
-                    avgError=(avgError * 100),
-                    fieldName=fieldName
-                ),
-                "Plugins",
-                Qgis.Info
-            )
-        else:
-            QgsMessageLog.logMessage(
-                self.tr("cartogram3 computation cancelled by user")
-            ),
-            "Plugins",
-            Qgis.Info
-
-    def workerError(self, e, exceptionString):
-        self.iface.messageBar().pushCritical(
-            self.tr("Error"),
-            self.tr(
-                "An error occurred during cartogram creation. "
-                + "Please see the “Plugins” section of the message "
-                + "log for details."
-            )
-        )
-        QgsMessageLog.logMessage(
-            exceptionString,
-            "Plugins",
-            Qgis.Critical
-        )
-
-        # empty the job queue
-        self.jobs = queue.Queue()
-        self.workerFinished()
 
     def addSampleDataset(self):
         try:

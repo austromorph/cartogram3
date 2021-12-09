@@ -43,7 +43,7 @@ class CartogramFeature:
         try:
             return self._area
         except AttributeError:
-            self._recompute_vertices_area_radius_centroid()
+            self._recompute_area_radius_centroid()
             return self._area
 
     @property
@@ -63,7 +63,7 @@ class CartogramFeature:
         try:
             return self._cx
         except AttributeError:
-            self._recompute_vertices_cx_radius_centroid()
+            self._recompute_area_radius_centroid()
             return self._cx
 
     @property
@@ -71,19 +71,19 @@ class CartogramFeature:
         try:
             return self._cy
         except AttributeError:
-            self._recompute_vertices_cy_radius_centroid()
+            self._recompute_area_radius_centroid()
             return self._cy
 
     @property
     def geometry(self):
-        return QgsGeometry().fromWkt(self.wkt).get()
+        return QgsGeometry().fromWkt(self.wkt)
 
     @property
     def mass(self):
         try:
             return self._mass
         except AttributeError:
-            self._recompute_mass_mass()
+            self._recompute_mass_sizeerror()
             return self._mass
 
     @property
@@ -91,7 +91,7 @@ class CartogramFeature:
         try:
             return self._radius
         except AttributeError:
-            self._recompute_vertices_radius_radius_centroid()
+            self._recompute_area_radius_centroid()
             return self._radius
 
     @property
@@ -107,7 +107,7 @@ class CartogramFeature:
         try:
             return self._vertices
         except AttributeError:
-            self._recompute_vertices_area_radius_centroid()
+            self._vertices = Vertices(self.geometry)
             return self._vertices
 
     @property
@@ -115,9 +115,8 @@ class CartogramFeature:
         try:
             return self._wkt
         except AttributeError:
-            self._wkt = self.vertices.as_wkt(self._force_multipolygon)
+            self._wkt = self._vertices.as_wkt(self._force_multipolygon)
             return self._wkt
-            # TODO: how do we best invalidate _wkt?
 
     @wkt.setter
     def wkt(self, wkt):
@@ -138,15 +137,12 @@ class CartogramFeature:
             / min(self.area, target_area)
         )
 
-    def _recompute_vertices_area_radius_centroid(self):
+    def _recompute_area_radius_centroid(self):
         geometry = self.geometry
         crs = QgsCoordinateReferenceSystem.fromProj(self.crs)
         distance_area_calculator = QgsDistanceArea()
         distance_area_calculator.setSourceCrs(crs, QgsCoordinateTransformContext())
         distance_area_calculator.setEllipsoid("WGS84")
-
-        # recompute vertices
-        self._vertices = Vertices(geometry)
 
         # recompute area
         self._area = distance_area_calculator.measureArea(geometry)

@@ -1,6 +1,7 @@
 [general]
 name=cartogram3
 version=3.0.4
+hasProcessingProvider=yes
 
 category=Vector
 tags=geometry, layers, polygon, shapefile
