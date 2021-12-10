@@ -1,5 +1,9 @@
 Change Log 
 ==========
+* __3.1.0__ (2021-12-10):
+    * fix issues 22, 23 (segfaults on QGIS>=3.20, on MacOS and Windows)
+    * new: processing toolbox algorithm
+    * improved performance
 * __3.0.4__ (2019-09-24):
     * fix pending deprecation: `QgsGeometry().set()` marked as deprecated
 * __3.0.3__ (2019-03-15):

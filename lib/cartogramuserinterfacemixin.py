@@ -11,7 +11,7 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QLabel, QPushButton, QProgressBar
 from qgis.PyQt.QtXml import QDomDocument
-from qgis.core import Qgis, QgsMapLayer, QgsMessageLog, QgsProject, QgsWkbTypes
+from qgis.core import Qgis, QgsMapLayer, QgsProject, QgsWkbTypes
 from qgis.gui import QgsMessageBarItem
 
 from ..ui import CartogramDialog

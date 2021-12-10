@@ -112,8 +112,6 @@ class CartogramWorkOrchestratorMixIn:
             self.tasks.append(self.start_task(input_layer, field, max_iterations, max_average_error))
 
     def task_finished(self, successful, results={}):
-        with open("/tmp/cartogram-debug", "a") as f:
-            print(successful, results, file=f)
         if successful:
             output_layer = self.context.getMapLayer(results["OUTPUT"])
             if output_layer and output_layer.isValid():
@@ -124,7 +122,6 @@ class CartogramWorkOrchestratorMixIn:
 
         if self.have_all_tasks_finished():
             self.tasks = []
-            pass  # TODO
 
     def update_progress(self, *args, **kwargs):
         progress = sum([task.progress() for task in self.tasks]) / len(self.tasks)
