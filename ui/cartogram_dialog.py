@@ -1,28 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-/***************************************************************************
- CartogramDialog
-                                 A QGIS plugin
- Generate anamorphic maps
-                             -------------------
-        begin                : 2017-02-09
-        git sha              : $Format:%H$
-        copyright            : (C) 2017 by Christoph Fink
-        email                : morph@austromorph.space
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-"""
+"""Main dialog for the cartogram3 plugin."""
 
 import os
 
+from qgis.core import QgsFieldProxyModel, QgsMapLayerProxyModel
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
 
@@ -41,5 +22,30 @@ class CartogramDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def __init__(self, parent=None):
         """Initialise a CartogramDialog."""
-        super(CartogramDialog, self).__init__(parent)
+        super().__init__(parent)
         self.setupUi(self)
+
+        # filter ui: polygon layers, numeric fields only
+        self.layerComboBox.setFilters(
+            QgsMapLayerProxyModel.PolygonLayer
+        )
+        self.fieldListView.setFilters(
+            QgsFieldProxyModel.Numeric
+        )
+
+        # connect changed-signal to validation function
+        self.fieldListView.selectionModel().selectionChanged.connect(
+            self.enable_ok_button_only_when_field_selected
+        )
+
+        # sync fieldListView with layerComboBox
+        self.layerComboBox.layerChanged.emit(
+            self.layerComboBox.currentLayer()
+        )
+
+    def enable_ok_button_only_when_field_selected(self, *args, **kwargs):
+        """Enable OK button when at least one field is selected, only."""
+        if self.fieldListView.selectedFields():
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(True)
+        else:
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)

@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingOutputString,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
@@ -26,7 +27,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
     # identifiers for input and output variables (‘magic strings’)
     INPUT = "INPUT"
-    INPUT_FIELD = "INPUT_FIELD"
+    FIELD = "FIELD"
     OUTPUT = "OUTPUT"
     MAX_ITERATIONS = "MAX_ITERATIONS"
     MAX_AVERAGE_ERROR = "MAX_AVERAGE_ERROR"
@@ -62,7 +63,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         )
         self.addParameter(
             QgsProcessingParameterField(
-                self.INPUT_FIELD,
+                self.FIELD,
                 self.tr("Field"),
                 type=QgsProcessingParameterField.Numeric,
                 parentLayerParameterName=self.INPUT
@@ -79,12 +80,12 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.MAX_AVERAGE_ERROR,
-                self.tr("max. average error"),
+                self.tr("max. average error (%)"),
                 type=QgsProcessingParameterNumber.Double,
                 # metadata={"widget_wrapper": {"decimals": 2}},
-                minValue=0.001,
-                defaultValue=0.1,
-                maxValue=1.0
+                minValue=0.1,
+                defaultValue=10.0,
+                maxValue=100.0
             )
         )
         self.addParameter(
@@ -94,13 +95,22 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 type=QgsProcessing.TypeVectorPolygon
             )
         )
+        self.addOutput(
+            QgsProcessingOutputString(
+                self.FIELD,
+                self.tr("Field")
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         input_layer = self.parameterAsSource(parameters, self.INPUT, context)
         if input_layer is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
-        field_name = self.parameterAsFields(parameters, self.INPUT_FIELD, context)[0]
+        field_name = self.parameterAsFields(parameters, self.FIELD, context)[0]
+        max_iterations = self.parameterAsInt(parameters, self.MAX_ITERATIONS, context)
+        max_average_error = self.parameterAsDouble(parameters, self.MAX_AVERAGE_ERROR, context)
+        max_average_error = (max_average_error / 100.0 + 1.0)  # input = percentage
 
         output_layer, output_layer_id = self.parameterAsSink(
             parameters,
@@ -122,20 +132,12 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             "memory"
         )
         memory_layer_data_provider = memory_layer.dataProvider()
-
-        # copy the structure
-        memory_layer.startEditing()
-        memory_layer_data_provider.addAttributes(
-            input_layer.fields().toList()
-        )
-        memory_layer.commitChanges()
-
-        memory_layer_data_provider.addFeatures(
-            list(input_layer.getFeatures())
-        )
+        memory_layer_data_provider.addAttributes(input_layer.fields().toList())
+        memory_layer.updateFields()
+        memory_layer_data_provider.addFeatures(list(input_layer.getFeatures()))
 
         cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name)
-        cartogram_features.transform()
+        cartogram_features.transform(max_iterations, max_average_error, feedback)
         cartogram_features.copy_geometries_back_to_layer(memory_layer)
 
         # We are sometimes left with slithers and polygons misshaped in other ways,
@@ -143,7 +145,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         buffered_layer = processing.run(
             "native:buffer", {
                 'INPUT': memory_layer,
-                'DISTANCE': 10.0,
+                'DISTANCE': 0.0,
                 'OUTPUT': 'memory:'
             },
             context=context,
@@ -154,4 +156,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         for feature in buffered_layer.getFeatures():
             output_layer.addFeature(feature, QgsFeatureSink.FastInsert)
 
-        return {self.OUTPUT: output_layer_id}
+        return {
+            self.OUTPUT: output_layer_id,
+            self.FIELD: field_name
+        }

@@ -123,7 +123,7 @@ class CartogramFeatures:
         )
         return total_value
 
-    def transform(self, max_iterations=10, max_average_error=0.1):
+    def transform(self, max_iterations=10, max_average_error=0.1, feedback=None):
         iteration = 0
         average_error = self.average_error
 
@@ -154,6 +154,8 @@ class CartogramFeatures:
 
             iteration += 1
             average_error = self.average_error
+            if feedback:
+                feedback.setProgress(iteration * 1.0 / max_iterations)
 
     @staticmethod
     def transformVertex(vertex, features, reduction_factor):

@@ -25,4 +25,4 @@ class CartogramProcessingProvider(QgsProcessingProvider):
         return self.tr("Cartogram")
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(__file__), "img", "icon.png"))
+        return QIcon(os.path.join(os.path.dirname(__file__), "..", "img", "icon.png"))

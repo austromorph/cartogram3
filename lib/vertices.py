@@ -2,7 +2,7 @@
 
 """Vertices that belong to a geometry."""
 
-from qgis.core import QgsMessageLog, QgsVertexId
+from qgis.core import QgsVertexId
 
 
 class Vertices:
@@ -29,15 +29,15 @@ class Vertices:
                         )
                         self._vertices[part][ring].append((point.x(), point.y()))
                     except ValueError:
-                        with open("/tmp/vertices.err", "a") as f:
-                            print(
-                                (
-                                    "Invalid vertex address in "
-                                    + "part {:d}, ring {:d}, vertex {:d}.vertices, "
-                                    + "undefined behaviour expected."
-                                ).format(part, ring, vertex),
-                                file=f
-                            )
+                        # with open("/tmp/vertices.err", "a") as f:
+                        #     print(
+                        #         (
+                        #             "Invalid vertex address in "
+                        #             + "part {:d}, ring {:d}, vertex {:d}.vertices, "
+                        #             + "undefined behaviour expected."
+                        #         ).format(part, ring, vertex),
+                        #         file=f
+                        #     )
                         continue
 
     def __getitem__(self, key):
