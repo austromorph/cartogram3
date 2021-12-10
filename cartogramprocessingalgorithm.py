@@ -25,9 +25,9 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
     """Provide a cartogram algorithm to the processing toolbox."""
 
     # identifiers for input and output variables (‘magic strings’)
-    INPUT_LAYER = "INPUT_LAYER"
-    INPUT_LAYER_FIELD = "INPUT_LAYER_FIELD"
-    OUTPUT_LAYER = "OUTPUT_LAYER"
+    INPUT = "INPUT"
+    INPUT_FIELD = "INPUT_FIELD"
+    OUTPUT = "OUTPUT"
     MAX_ITERATIONS = "MAX_ITERATIONS"
     MAX_AVERAGE_ERROR = "MAX_AVERAGE_ERROR"
 
@@ -55,17 +55,17 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.INPUT_LAYER,
+                self.INPUT,
                 self.tr("Input layer"),
                 [QgsProcessing.TypeVectorPolygon]
             )
         )
         self.addParameter(
             QgsProcessingParameterField(
-                self.INPUT_LAYER_FIELD,
+                self.INPUT_FIELD,
                 self.tr("Field"),
                 type=QgsProcessingParameterField.Numeric,
-                parentLayerParameterName=self.INPUT_LAYER
+                parentLayerParameterName=self.INPUT
             )
         )
         self.addParameter(
@@ -89,29 +89,29 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         )
         self.addParameter(
             QgsProcessingParameterFeatureSink(
-                self.OUTPUT_LAYER,
+                self.OUTPUT,
                 self.tr("Output layer"),
                 type=QgsProcessing.TypeVectorPolygon
             )
         )
 
     def processAlgorithm(self, parameters, context, feedback):
-        input_layer = self.parameterAsSource(parameters, self.INPUT_LAYER, context)
+        input_layer = self.parameterAsSource(parameters, self.INPUT, context)
         if input_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT_LAYER))
+            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
-        field_name = self.parameterAsFields(parameters, self.INPUT_LAYER_FIELD, context)[0]
+        field_name = self.parameterAsFields(parameters, self.INPUT_FIELD, context)[0]
 
         output_layer, output_layer_id = self.parameterAsSink(
             parameters,
-            self.OUTPUT_LAYER,
+            self.OUTPUT,
             context,
             input_layer.fields(),
             input_layer.wkbType(),
             input_layer.sourceCrs()
         )
         if output_layer is None:
-            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT_LAYER))
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         # first, copy all features to a temporary layer
         memory_layer = QgsVectorLayer(
@@ -154,4 +154,4 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         for feature in buffered_layer.getFeatures():
             output_layer.addFeature(feature, QgsFeatureSink.FastInsert)
 
-        return {self.OUTPUT_LAYER: output_layer_id}
+        return {self.OUTPUT: output_layer_id}
