@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
+    <width>414</width>
     <height>384</height>
    </rect>
   </property>
@@ -60,14 +60,14 @@
       </item>
       <item row="1" column="1">
        <widget class="QSpinBox" name="iterationsSpinBox">
+        <property name="minimum">
+         <number>1</number>
+        </property>
         <property name="maximum">
          <number>9999</number>
         </property>
         <property name="value">
          <number>10</number>
-        </property>
-        <property name="minimum">
-         <number>1</number>
         </property>
        </widget>
       </item>
@@ -123,7 +123,7 @@
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>.qgsmaplayercombobox</header>
+   <header>qgsmaplayercombobox.h</header>
   </customwidget>
   <customwidget>
    <class>QgsFieldListView</class>

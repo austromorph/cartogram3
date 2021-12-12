@@ -24,4 +24,4 @@ __all__ = [
 ]
 
 from .qgsfieldlistview import QgsFieldListView
-from .cartogram_dialog import CartogramDialog
+from .cartogramdialog import CartogramDialog
