@@ -8,10 +8,20 @@ import functools
 import itertools
 import math
 import multiprocessing
+import os.path
+import platform
+import sys
 
 from qgis.core import QgsGeometry
 
 from .cartogramfeature import CartogramFeature
+
+
+if platform.system() == "Windows":
+    sys.argv = [os.path.abspath(__file__)]
+    multiprocessing.set_executable(
+        os.path.join(sys.exec_prefix, "pythonw.exe")
+    )
 
 
 class CartogramFeatures:
