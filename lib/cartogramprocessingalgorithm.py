@@ -3,6 +3,7 @@
 
 """Provide a cartogram algorithm to the processing toolbox."""
 
+
 from qgis import processing
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
