@@ -19,9 +19,10 @@ from .cartogramfeature import CartogramFeature
 
 if platform.system() == "Windows":
     sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(
-        os.path.join(sys.exec_prefix, "pythonw.exe")
-    )
+    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
+elif platform.system() == "Darwin":
+    sys.argv = [os.path.abspath(__file__)]
+    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
 
 
 class CartogramFeatures:
@@ -29,7 +30,6 @@ class CartogramFeatures:
     def __init__(self):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
-        self._layer = None  # not yet really kosher - in some cases, we remember the input layer
         self.workers = multiprocessing.get_context("spawn").Pool()
 
     def __del__(self):
