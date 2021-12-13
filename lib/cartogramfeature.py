@@ -132,10 +132,13 @@ class CartogramFeature:
             self._mass = 0
         else:
             self._mass = math.sqrt(target_area / math.pi) - self.radius
-        self._sizeerror = (
-            max(self.area, target_area)
-            / min(self.area, target_area)
-        )
+        try:
+            self._sizeerror = (
+                max(self.area, target_area)
+                / min(self.area, target_area)
+            )
+        except ZeroDivisionError:
+            self._sizeerror = 1.0
 
     def _recompute_area_radius_centroid(self):
         geometry = self.geometry
