@@ -137,8 +137,8 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         memory_layer.updateFields()
         memory_layer_data_provider.addFeatures(list(input_layer.getFeatures()))
 
-        cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name)
-        cartogram_features.transform(max_iterations, max_average_error, feedback)
+        cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name, feedback)
+        cartogram_features.transform(max_iterations, max_average_error)
         cartogram_features.copy_geometries_back_to_layer(memory_layer)
 
         # We are sometimes left with slithers and polygons misshaped in other ways,

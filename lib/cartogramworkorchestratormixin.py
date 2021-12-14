@@ -8,7 +8,6 @@ import os.path
 
 from qgis.core import (
     QgsApplication,
-    QgsMessageLog,
     QgsProcessingAlgRunnerTask,
     QgsProcessingContext,
     QgsProcessingFeedback,
@@ -34,6 +33,7 @@ class CartogramWorkOrchestratorMixIn:
         QgsApplication.processingRegistry().addProvider(self.provider)
 
     def cancel_all_tasks(self):
+        self.disable_cancel_button()
         for task in self.tasks:
             task.cancel()
 
@@ -108,6 +108,9 @@ class CartogramWorkOrchestratorMixIn:
         return task  # , context, feedback
 
     def start_tasks(self, input_layer, fields, max_iterations, max_average_error):
+        # create a fresh feedback and context (so we don’t stay in isCanceled(), for instance)
+        self.context = QgsProcessingContext()
+        self.feedback = QgsProcessingFeedback()
         for field in fields:
             self.tasks.append(self.start_task(input_layer, field, max_iterations, max_average_error))
 
@@ -118,10 +121,14 @@ class CartogramWorkOrchestratorMixIn:
                 layer = self.context.takeResultLayer(output_layer.id())
                 self.add_result_layer_to_map_canvas(layer, results["FIELD"])
         else:
-            QgsMessageLog.logMessage("Failed to compute cartogram", "cartogram3")
+            if self.feedback.isCanceled():
+                self.feedback.pushWarning("User canceled cartogram computation")
+            self.feedback.reportError("Failed to compute cartogram")
 
         if self.have_all_tasks_finished():
             self.tasks = []
+
+        self.clean_up_ui()  # remove progress bar
 
     def update_progress(self, *args, **kwargs):
         progress = sum([task.progress() for task in self.tasks]) / len(self.tasks)
