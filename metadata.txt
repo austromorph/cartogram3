@@ -20,7 +20,7 @@ email=christoph@christophfink.com
 
 icon=img/icon.png
 
-qgisMinimumVersion=3.4
+qgisMinimumVersion=3.16.12
 qgisMaximumVersion=3.99
 
 changelog=
