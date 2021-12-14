@@ -20,12 +20,12 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt5.QtCore import (
+from qgis.PyQt.QtCore import (
     pyqtSignal,
     pyqtSlot,
     QItemSelection
 )
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QListView
 )
 from qgis.core import (
