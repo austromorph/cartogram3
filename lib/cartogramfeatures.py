@@ -140,6 +140,7 @@ class CartogramFeatures:
         return total_value
 
     def transform(self, max_iterations=10, max_average_error=0.1):
+        total_number_of_vertices = len(list(self.vertices))
         iteration = 0
         average_error = self.average_error
 
@@ -158,20 +159,28 @@ class CartogramFeatures:
                 )
             )
 
+            number_of_vertices_processed = 0
             for feature_id, part, ring, vertex, point in transformed_vertices:
                 self[feature_id].vertices[part, ring, vertex] = point
 
-            # invalidate the geometries of all features, so they’re reconstructed
-            # from the changed set of vertices
-            for feature in self:
+                # invalidate the geometries of all features, so they’re reconstructed
+                # from the changed set of vertices
                 try:
-                    del feature._wkt
+                    del self[feature_id]._wkt
                 except AttributeError:
                     pass
 
+                number_of_vertices_processed += 1
+                self.feedback.setProgress(
+                    (
+                        (iteration * total_number_of_vertices)  # completed iterations
+                        + number_of_vertices_processed  # current iteration
+                    )
+                    / (total_number_of_vertices * max_iterations)  # expected overall vertex ops
+                )
+
             iteration += 1
             average_error = self.average_error
-            self.feedback.setProgress(iteration * 1.0 / max_iterations)
 
     @staticmethod
     def transformVertex(vertex, features, reduction_factor):
