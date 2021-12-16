@@ -120,6 +120,17 @@ class CartogramWorkOrchestratorMixIn:
             if output_layer and output_layer.isValid():
                 layer = self.context.takeResultLayer(output_layer.id())
                 self.add_result_layer_to_map_canvas(layer, results["FIELD"])
+                self.feedback.pushInfo(
+                    (
+                        "Finished computing cartogram for layer {:s} on field {:s} "
+                        + "after {:d} iterations with {:.2n}% residual error."
+                    ).format(
+                        self.input_layer.name(),
+                        results["FIELD"],
+                        results["ITERATIONS"],
+                        results["RESIDUAL_AVERAGE_ERROR"]
+                    )
+                )
         else:
             if self.feedback.isCanceled():
                 self.feedback.pushWarning("User canceled cartogram computation")
