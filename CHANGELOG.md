@@ -1,5 +1,8 @@
 Change Log 
 ==========
+* __3.1.1__ (2021-12-16):
+    * fixed regressions (issues 24, 27; residual error reporting, cancel button)
+    * progress bar now more fine-grained
 * __3.1.0__ (2021-12-10):
     * fix issues 22, 23 (segfaults on QGIS>=3.20, on MacOS and Windows)
     * new: processing toolbox algorithm
