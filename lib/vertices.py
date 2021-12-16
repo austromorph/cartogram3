@@ -54,6 +54,9 @@ class Vertices:
                 for vertex in range(len(self._vertices[part][ring])):
                     yield part, ring, vertex, self._vertices[part][ring][vertex]
 
+    def __len__(self):
+        return len(self._vertices)
+
     def as_wkt(self, force_multipolygon=False):
         # TODO: rewrite this as a nice and crispy nested list comprehension
         parts = []

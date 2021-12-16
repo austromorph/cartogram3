@@ -3,9 +3,9 @@ QGIS3 cartogram3 plugin
 
 This plugin creates continous cartograms (a.k.a. anamorphic maps) from polygon layers.
 
-It is a port of the [cartogram plugin](https://plugins.qgis.org/plugins/cartogram/) of [Morten Wulff](https://github.com/informeren/qgis-cartogram) and [Carson Farmer](https://github.com/carsonfarmer/cartogram) to QGIS 3, Python 3 and PyQt5. It also features a few improvements, such as parallel processing (using `multiprocessing`), the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition in addition to the number of iterations. Since version 3.1.0 (December 2021), the plugin also provides a Processing Toolbox algorithm that can be used on its own or, e.g., in model builder models.
+It is a port of the [cartogram plugin](https://plugins.qgis.org/plugins/cartogram/) by [Morten Wulff](https://github.com/informeren/qgis-cartogram) and [Carson Farmer](https://github.com/carsonfarmer/cartogram) to QGIS 3, Python 3 and PyQt5. It also features a few improvements, such as parallel processing (using `multiprocessing`), the option to select multiple variables to batch-produce cartograms, and the possibility to use a maximum total error threshold as a stop condition in addition to the number of iterations. Since version 3.1.0 (December 2021), the plugin also provides a Processing Toolbox algorithm that can be used on its own or, e.g., in model builder models.
 
-As its predecessors, this plugin implements the algorithm proposed by: 
+Like its predecessors, this plugin implements the algorithm proposed by:
 
 > Dougenik, J. A, N. R. Chrisman, and D. R. Niemeyer. 1985. "[An algorithm to construct continuous cartograms.](http://www.tandfonline.com/doi/abs/10.1111/j.0033-0124.1985.00075.x)" Professional Geographer 37:75-81 
 
@@ -14,7 +14,7 @@ Usage
 
 * If you have not done it, install the plugin from QGIS’ plugin manager.
 
-* Open a polygon dataset with an absolute count<sup>[1)](#footnote-1)</sup> of a certain variable, such as human population. If you do not have an own dataset immediately available, add the supplied sample data set from the plugin’s menu. <br>
+* Open a polygon dataset with an absolute count<sup>[1](#footnote-1)</sup> of a certain variable, such as human population. If you do not have an own dataset immediately available, add the supplied sample data set from the plugin’s menu. <br>
   In this example we use a choropleth map of the population of Austria’s NUTS2 regions. Austria is an excellent example, as the only major city of the country and its metropolitan area are home to roughly a third of the country’s inhabitants. As you can see, the map is styled with graduated symbols representing the respective region’s population density. We also added labels showing the population density.  
   ![Choropleth map of the population of Austria by NUTS2 regions](data/Austria_PopulationDensity_NUTS2_20170101.png)
 
@@ -24,7 +24,7 @@ Usage
 * Depending on the detail of your dataset and on your computer’s power, it takes from seconds to hours until you receive your results. The progress is shown in the QGIS message bar, also you can always click the cancel button to stop the computation early. The algorithm iterates over every point &times; every polygon, and thus scales extremely poorly. Consider simplifying your input dataset beforehand.  
   ![Cartogram of the population of Austria by NUTS2 regions](data/Austria_PopulationCartogram_NUTS2_20170101.png)
 
-<sup id="footnote-1">1)</sup> </a>Why an absolute count of a variable? Quote from the [worldmapper.org FAQ](http://www.worldmapper.org/faq.html):
+<sup id="footnote-1">[1]</sup> </a>Why an absolute count of a variable? Quote from the [worldmapper.org FAQ](http://www.worldmapper.org/faq.html):
 > Q. Why don't you have a map of population density or births per thousand? 
 > A. The maps are best understood as pie charts where the segment of the pie is reshaped to look like a country.  Then the area of that country is adjusted according to the proportion of the world total of a variable that is found there.  Just as a pie chart would.  As such, we can only map counts or totals.  We cannot map rates because they are not additive, that is to say that they do not add up to a meaningful total.  To return to the pie chart analogy, you would not draw a pie chart of population density but one of total population.
 

@@ -106,11 +106,7 @@ class CartogramUserInterfaceMixIn:
         )
 
         if self.have_all_tasks_finished():
-            try:
-                del self._progress_bar
-                self.iface.messageBar().popWidget(self._progress_bar_message_bar_item)
-            except RuntimeError:  # ‘wrapped C/C++ object has been deleted’
-                pass
+            self.clean_up_ui()
 
     def add_sample_dataset_clicked(self, message_bar_item=None):
         try:
@@ -118,6 +114,21 @@ class CartogramUserInterfaceMixIn:
         except TypeError:
             pass
         QgsProject.instance().addMapLayer(self.sample_layer())
+
+    def clean_up_ui(self):
+        try:
+            del self._progress_bar
+            del self._cancel_button
+            self.iface.messageBar().popWidget(self._progress_bar_message_bar_item)
+        except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
+            pass
+
+    def disable_cancel_button(self):
+        try:
+            self._cancel_button.setText(self.tr("Cancelled"))
+            self._cancel_button.setEnabled(False)
+        except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
+            pass
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -190,13 +201,14 @@ class CartogramUserInterfaceMixIn:
             progress_bar.setMaximum(100)
             message_bar_item.layout().addWidget(progress_bar)
 
-            # cancel_button = QPushButton(self.tr("Cancel"))
-            # cancel_button.clicked.connect(self.cancel_all_tasks)
-            # message_bar_item.layout().addWidget(cancel_button)
+            cancel_button = QPushButton(self.tr("Cancel"))
+            cancel_button.clicked.connect(self.cancel_all_tasks)
+            message_bar_item.layout().addWidget(cancel_button)
 
             self.iface.messageBar().pushWidget(message_bar_item)
             self._progress_bar_message_bar_item = message_bar_item
             self._progress_bar = progress_bar
+            self._cancel_button = cancel_button
 
             return self._progress_bar
 
@@ -235,6 +247,8 @@ class CartogramUserInterfaceMixIn:
                     selected_fields = self.dialog.fieldListView.selectedFields()
                     max_iterations = self.dialog.iterationsSpinBox.value()
                     max_average_error = self.dialog.averageErrorDoubleSpinBox.value()
+
+                    self.update_progress_bar(0)
 
                     self.start_tasks(
                         input_layer,

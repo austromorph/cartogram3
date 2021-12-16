@@ -12,7 +12,7 @@ import os.path
 import platform
 import sys
 
-from qgis.core import QgsGeometry
+from qgis.core import QgsGeometry, QgsProcessingFeedback
 
 from .cartogramfeature import CartogramFeature
 
@@ -27,10 +27,12 @@ elif platform.system() == "Darwin":
 
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
-    def __init__(self):
+    def __init__(self, feedback=QgsProcessingFeedback()):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
         self.workers = multiprocessing.get_context("spawn").Pool()
+        self.feedback = feedback
+        self.feedback.canceled.connect(self.stop_workers)
 
     def __del__(self):
         """Take care of the worker pool upon unloading."""
@@ -41,8 +43,8 @@ class CartogramFeatures:
     # instantiator and data output
 
     @staticmethod
-    def from_polygon_layer(layer, field_name):
-        cartogram_features = CartogramFeatures()
+    def from_polygon_layer(layer, field_name, feedback=QgsProcessingFeedback()):
+        cartogram_features = CartogramFeatures(feedback)
         crs = layer.sourceCrs().toProj()
         for feature in layer.getFeatures():
             feature_id = feature.id()
@@ -96,6 +98,10 @@ class CartogramFeatures:
             for part, ring, vertex, point in self._features[feature_id].vertices:
                 yield feature_id, part, ring, vertex, point
 
+    def stop_workers(self, *args, **kwargs):
+        self.workers.terminate()
+        self.workers.join()
+
     @property
     def total_area(self):
         total_area = sum(
@@ -133,13 +139,16 @@ class CartogramFeatures:
         )
         return total_value
 
-    def transform(self, max_iterations=10, max_average_error=0.1, feedback=None):
+    def transform(self, max_iterations=10, max_average_error=0.1):
+        self.feedback.setProgress(1)  # so it’s clear we’re doing something
+        total_number_of_vertices = len(list(self.vertices))
         iteration = 0
         average_error = self.average_error
 
         while (
                 iteration < max_iterations
                 and average_error > max_average_error
+                and not self.feedback.isCanceled()
         ):
             reduction_factor = 1.0 / (average_error + 1)
             transformed_vertices = self.workers.starmap(
@@ -151,21 +160,31 @@ class CartogramFeatures:
                 )
             )
 
+            number_of_vertices_processed = 0
             for feature_id, part, ring, vertex, point in transformed_vertices:
                 self[feature_id].vertices[part, ring, vertex] = point
 
-            # invalidate the geometries of all features, so they’re reconstructed
-            # from the changed set of vertices
-            for feature in self:
+                # invalidate the geometries of all features, so they’re reconstructed
+                # from the changed set of vertices
                 try:
-                    del feature._wkt
+                    del self[feature_id]._wkt
                 except AttributeError:
                     pass
 
+                number_of_vertices_processed += 1
+                self.feedback.setProgress(
+                    (
+                        (iteration * total_number_of_vertices)  # completed iterations
+                        + number_of_vertices_processed  # current iteration
+                        + 1  # the head start at the top of this function
+                    )
+                    / (total_number_of_vertices * max_iterations)  # expected overall vertex ops
+                )
+
             iteration += 1
             average_error = self.average_error
-            if feedback:
-                feedback.setProgress(iteration * 1.0 / max_iterations)
+
+        return iteration, average_error
 
     @staticmethod
     def transformVertex(vertex, features, reduction_factor):

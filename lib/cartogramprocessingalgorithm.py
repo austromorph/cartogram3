@@ -11,6 +11,7 @@ from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
+    QgsProcessingOutputNumber,
     QgsProcessingOutputString,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
@@ -29,9 +30,12 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
     # identifiers for input and output variables (‘magic strings’)
     INPUT = "INPUT"
     FIELD = "FIELD"
-    OUTPUT = "OUTPUT"
     MAX_ITERATIONS = "MAX_ITERATIONS"
     MAX_AVERAGE_ERROR = "MAX_AVERAGE_ERROR"
+
+    ITERATIONS = "ITERATIONS"
+    OUTPUT = "OUTPUT"
+    RESIDUAL_AVERAGE_ERROR = "RESIDUAL_AVERAGE_ERROR"
 
     def tr(self, string):
         return QCoreApplication.translate("Processing", string)
@@ -102,6 +106,18 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.tr("Field")
             )
         )
+        self.addOutput(
+            QgsProcessingOutputNumber(
+                self.ITERATIONS,
+                self.tr("Iterations needed to meet residual error threshold.")
+            )
+        )
+        self.addOutput(
+            QgsProcessingOutputNumber(
+                self.RESIDUAL_AVERAGE_ERROR,
+                self.tr("Residual average error.")
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
         input_layer = self.parameterAsSource(parameters, self.INPUT, context)
@@ -137,8 +153,11 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         memory_layer.updateFields()
         memory_layer_data_provider.addFeatures(list(input_layer.getFeatures()))
 
-        cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name)
-        cartogram_features.transform(max_iterations, max_average_error, feedback)
+        cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name, feedback)
+        iterations, average_error = cartogram_features.transform(
+            max_iterations,
+            max_average_error
+        )
         cartogram_features.copy_geometries_back_to_layer(memory_layer)
 
         # We are sometimes left with slithers and polygons misshaped in other ways,
@@ -159,5 +178,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
         return {
             self.OUTPUT: output_layer_id,
-            self.FIELD: field_name
+            self.FIELD: field_name,
+            self.ITERATIONS: iterations,
+            self.RESIDUAL_AVERAGE_ERROR: (average_error - 1) * 100.0  # we report in %
         }
