@@ -144,12 +144,15 @@ class CartogramFeatures:
         total_number_of_vertices = len(list(self.vertices))
         iteration = 0
         average_error = self.average_error
+        for feature in self:
+            self.feedback.pushInfo("{:s}: {:0.1f}, {:0.1f}, {:0.1f}".format(feature.wkt[:10], feature.sizeerror, feature.area, feature.mass))
 
         while (
                 iteration < max_iterations
                 and average_error > max_average_error
                 and not self.feedback.isCanceled()
         ):
+            self.feedback.pushInfo("iteration {:d}, average error: {:0.1f}".format(iteration, average_error))
             reduction_factor = 1.0 / (average_error + 1)
             transformed_vertices = self.workers.starmap(
                 CartogramFeatures.transformVertex,
@@ -164,13 +167,6 @@ class CartogramFeatures:
             for feature_id, part, ring, vertex, point in transformed_vertices:
                 self[feature_id].vertices[part, ring, vertex] = point
 
-                # invalidate the geometries of all features, so they’re reconstructed
-                # from the changed set of vertices
-                try:
-                    del self[feature_id]._wkt
-                except AttributeError:
-                    pass
-
                 number_of_vertices_processed += 1
                 self.feedback.setProgress(
                     (
@@ -180,6 +176,16 @@ class CartogramFeatures:
                     )
                     / (total_number_of_vertices * max_iterations)  # expected overall vertex ops
                 )
+
+            for feature in self:
+                # invalidate the geometry of each features, so that it is reconstructed
+                # from the changed set of vertices
+                try:
+                    del feature._wkt
+                    del feature._area
+                except AttributeError as exception:
+                    self.feedback.pushInfo("Could not delete wkt of feature {:d}: {:s}".format(feature_id, repr(exception)))
+                    pass
 
             iteration += 1
             average_error = self.average_error
