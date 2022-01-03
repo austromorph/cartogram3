@@ -70,32 +70,42 @@
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="27"/>
         <source>Field(s):</source>
-        <translation>Attribut(e):</translation>
+        <translation type="obsolete">Attribut(e):</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="41"/>
+        <location filename="../ui/cartogram_dialog.ui" line="47"/>
         <source>Stop conditions:</source>
         <translation>Bedingungen:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="57"/>
+        <location filename="../ui/cartogram_dialog.ui" line="63"/>
         <source>max. number of iterations:</source>
         <translation>max. Durchgänge:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="77"/>
+        <location filename="../ui/cartogram_dialog.ui" line="83"/>
         <source>max. average error:</source>
         <translation>max. mittlerer Fehler:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="84"/>
+        <location filename="../ui/cartogram_dialog.ui" line="90"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="97"/>
+        <location filename="../ui/cartogram_dialog.ui" line="103"/>
         <source>Calculation stops as soon as one condition is met.</source>
         <translation>Die Berechnung endet, sobald eine Bedingung erfüllt ist.</translation>
+    </message>
+    <message>
+        <location filename="../ui/cartogram_dialog.ui" line="30"/>
+        <source>To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.</source>
+        <translation>Um anamorphe Karten für mehrere Attribute gleichzeitig zu berechnen, verwenden Sie bitte die Batch-Funktion der Processing Toolbox.</translation>
+    </message>
+    <message>
+        <location filename="../ui/cartogram_dialog.ui" line="33"/>
+        <source>Field:</source>
+        <translation>Attribut:</translation>
     </message>
 </context>
 <context>
@@ -108,19 +118,16 @@
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="53"/>
         <source>Vector geometry</source>
-        <translatorcomment>(s. andere Processing tools)</translatorcomment>
         <translation>Vektorgeometrie</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="62"/>
         <source>Input layer</source>
-        <translatorcomment>(s. andere Processing tools)</translatorcomment>
         <translation>Eingabelayer</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="103"/>
         <source>Field</source>
-        <translatorcomment>(s. andere Processing tools)</translatorcomment>
         <translation>Feld</translation>
     </message>
     <message>
@@ -136,7 +143,6 @@
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="96"/>
         <source>Output layer</source>
-        <translatorcomment>(s. andere Processing tools)</translatorcomment>
         <translation>Ausgabelayer</translation>
     </message>
     <message>
@@ -166,44 +172,58 @@
         <translation>Kartogramm von „{:s}“, verzerrt nach „{:s}“</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="128"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="126"/>
         <source>Cancelled</source>
         <translation>Abgebrochen</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="135"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="151"/>
         <source>&amp;Cartogram</source>
         <translation>&amp;Kartogramm</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="140"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="156"/>
         <source>Compute cartogram</source>
         <translation>Kartogramm berechnen</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="177"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="193"/>
         <source>Add sample dataset</source>
         <translation>Beispieldatensatz hinzufügen</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="169"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="185"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="171"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="187"/>
         <source>You need at least one polygon vector layer to create a cartogram.</source>
         <translation>Für die Berechnung eines Kartogramms ist mindestens ein Polygon-Vektorlayer erforderlich.</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="195"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="211"/>
         <source>Computing cartogram</source>
         <translation>Berechne Kartogramm</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="204"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="220"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
+        <source>Geographic CRS</source>
+        <translation>Geografisches CRS</translation>
+    </message>
+    <message>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
+        <source>Computing a cartogram for a layer with a geographic CRS might not yield best results (consider reprojecting the layer to a projected coordinate system). 
+
+Do you want to proceed?</source>
+        <translation>Die Kartogrammberechnung für einen Layer mit geografischem Koordinatenreferenzsystem gelingt nicht immer (wir empfehlen, den Layer in ein projiziertes Referenzsystem umzurechnen).
+
+Trotzdem fortfahren?</translation>
     </message>
 </context>
 <context>

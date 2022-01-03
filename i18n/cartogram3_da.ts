@@ -69,32 +69,42 @@
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="27"/>
         <source>Field(s):</source>
-        <translation>Felt(er):</translation>
+        <translation type="obsolete">Felt(er):</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="41"/>
+        <location filename="../ui/cartogram_dialog.ui" line="47"/>
         <source>Stop conditions:</source>
         <translation>Betingelser:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="57"/>
+        <location filename="../ui/cartogram_dialog.ui" line="63"/>
         <source>max. number of iterations:</source>
         <translation>max. iterationer:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="77"/>
+        <location filename="../ui/cartogram_dialog.ui" line="83"/>
         <source>max. average error:</source>
         <translation>max. gennemsnitlig fejl:</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="84"/>
+        <location filename="../ui/cartogram_dialog.ui" line="90"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../ui/cartogram_dialog.ui" line="97"/>
+        <location filename="../ui/cartogram_dialog.ui" line="103"/>
         <source>Calculation stops as soon as one condition is met.</source>
         <translation>Beregningen slutter, når en betingelse er opfyldt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/cartogram_dialog.ui" line="30"/>
+        <source>To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/cartogram_dialog.ui" line="33"/>
+        <source>Field:</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -161,44 +171,56 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="128"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="126"/>
         <source>Cancelled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="135"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="151"/>
         <source>&amp;Cartogram</source>
         <translation type="unfinished">&amp;Cartogram</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="140"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="156"/>
         <source>Compute cartogram</source>
         <translation type="unfinished">Opret cartogram</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="177"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="193"/>
         <source>Add sample dataset</source>
         <translation type="unfinished">Tilføj eksempeldata</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="169"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="185"/>
         <source>Error</source>
         <translation type="unfinished">Fejl</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="171"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="187"/>
         <source>You need at least one polygon vector layer to create a cartogram.</source>
         <translation type="unfinished">Du skal bruge mindst ét vektorlag for at kunne oprette et cartogram.</translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="195"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="211"/>
         <source>Computing cartogram</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../lib/cartogramuserinterfacemixin.py" line="204"/>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="220"/>
         <source>Cancel</source>
         <translation type="unfinished">Annuller</translation>
+    </message>
+    <message>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
+        <source>Geographic CRS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
+        <source>Computing a cartogram for a layer with a geographic CRS might not yield best results (consider reprojecting the layer to a projected coordinate system). 
+
+Do you want to proceed?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
