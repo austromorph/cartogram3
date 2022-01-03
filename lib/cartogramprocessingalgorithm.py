@@ -141,17 +141,17 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         # first, copy all features to a temporary layer
-        memory_layer = QgsVectorLayer(
-            QgsWkbTypes.displayString(input_layer.wkbType())
-            + "?crs=" + input_layer.sourceCrs().authid()
-            + "&index=yes",
-            "cartogram3 working copy",
-            "memory"
+        # we use a zero-width buffer algorithm to do this,
+        # in order to fix potential invalid geometries at the same time
+        memory_layer = processing.run(
+            "native:buffer", {
+                "INPUT": input_layer,
+                "DISTANCE": 0.0,
+                "OUTPUT": "memory:"
+            },
+            context=context,
+            feedback=feedback
         )
-        memory_layer_data_provider = memory_layer.dataProvider()
-        memory_layer_data_provider.addAttributes(input_layer.fields().toList())
-        memory_layer.updateFields()
-        memory_layer_data_provider.addFeatures(list(input_layer.getFeatures()))
 
         cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name, feedback)
         iterations, average_error = cartogram_features.transform(
@@ -164,13 +164,13 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         # a zero-buffer around them works well
         buffered_layer = processing.run(
             "native:buffer", {
-                'INPUT': memory_layer,
-                'DISTANCE': 0.0,
-                'OUTPUT': 'memory:'
+                "INPUT": memory_layer,
+                "DISTANCE": 0.0,
+                "OUTPUT": "memory:"
             },
             context=context,
             feedback=feedback
-        )['OUTPUT']
+        )["OUTPUT"]
 
         # finally, copy features to the output sink
         for feature in buffered_layer.getFeatures():
