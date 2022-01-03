@@ -103,7 +103,7 @@ class CartogramWorkOrchestratorMixIn:
             self.feedback
         )
         task.executed.connect(self.task_finished)
-        task.progressChanged.connect(self.update_progress)
+        #task.progressChanged.connect(self.update_progress)
         QgsApplication.taskManager().addTask(task)
         return task  # , context, feedback
 
@@ -111,6 +111,7 @@ class CartogramWorkOrchestratorMixIn:
         # create a fresh feedback and context (so we don’t stay in isCanceled(), for instance)
         self.context = QgsProcessingContext()
         self.feedback = QgsProcessingFeedback()
+        self.feedback.progressChanged.connect(self.update_progress)
         for field in fields:
             self.tasks.append(self.start_task(input_layer, field, max_iterations, max_average_error))
 

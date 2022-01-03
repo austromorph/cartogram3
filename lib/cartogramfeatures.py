@@ -104,18 +104,22 @@ class CartogramFeatures:
 
     @property
     def total_area(self):
-        total_area = sum(
-            self.workers.imap(
-                # lambda x: x.area,
-                functools.partial(_getattr, name="area"),
-                self
-            )
-        )
+#         total_area = sum(
+#             self.workers.imap(
+#                 # lambda x: x.area,
+#                 functools.partial(_getattr, name="area"),
+#                 self
+#             )
+#         )
+        all_areas = list(self.workers.imap(functools.partial(_getattr, name="area"), self))
+        self.feedback.pushInfo(str(all_areas))
+        total_area = sum(all_areas)
         return total_area
 
     @property
     def total_error(self):
         area_value_ratio = self.total_area / self.total_value
+        self.feedback.pushInfo("{:0.1f} = {:0.1f} / {:0.1f}".format(area_value_ratio, self.total_area, self.total_value))
         for feature in self:
             feature.area_value_ratio = area_value_ratio
         total_error = sum(
@@ -144,8 +148,8 @@ class CartogramFeatures:
         total_number_of_vertices = len(list(self.vertices))
         iteration = 0
         average_error = self.average_error
-        for feature in self:
-            self.feedback.pushInfo("{:s}: {:0.1f}, {:0.1f}, {:0.1f}".format(feature.wkt[:10], feature.sizeerror, feature.area, feature.mass))
+        #for feature in self:
+        #    self.feedback.pushInfo("{:s}: {:0.1f}, {:0.1f}, {:0.1f}".format(feature.wkt[:10], feature.sizeerror, feature.area, feature.mass))
 
         while (
                 iteration < max_iterations
@@ -217,6 +221,10 @@ class CartogramFeatures:
 
                 x += (x0 - cx) * force
                 y += (y0 - cy) * force
+
+#                 # just quickly checking whether clipping to bounds would work
+#                 x = ((x + 180.0) % 360.0) - 180.0
+#                 y = ((y + 90.0) % 180.0) - 90.0
 
         return feature_id, part, ring, vertex, (x, y)
 

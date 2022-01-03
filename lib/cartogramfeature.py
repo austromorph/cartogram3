@@ -116,6 +116,9 @@ class CartogramFeature:
             return self._wkt
         except AttributeError:
             self._wkt = self._vertices.as_wkt(self._force_multipolygon)
+            if self.id == 176:
+                with open("/tmp/cartogram.debug", "a") as f:
+                    print(self._wkt, file=f)
             return self._wkt
 
     @wkt.setter
