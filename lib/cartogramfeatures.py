@@ -86,10 +86,12 @@ class CartogramFeatures:
         """Use this chunksize for multiprocessing.imap() etc..."""
         chunksize = min(
             10000,
-            int(self.total_number_of_vertices / (2 * multiprocessing.cpu_count()))
+            int(
+                self.total_number_of_vertices
+                / (2 * multiprocessing.cpu_count())
+            )
         )
         return chunksize
-
 
     @property
     def features(self):
