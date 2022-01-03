@@ -81,6 +81,17 @@ class CartogramFeatures:
         return self.total_error / len(self)
 
     @property
+    @functools.cache
+    def _chunksize(self):
+        """Use this chunksize for multiprocessing.imap() etc..."""
+        chunksize = min(
+            10000,
+            int(self.total_number_of_vertices / (2 * multiprocessing.cpu_count()))
+        )
+        return chunksize
+
+
+    @property
     def features(self):
         return self.values()
 
@@ -104,32 +115,33 @@ class CartogramFeatures:
 
     @property
     def total_area(self):
-#         total_area = sum(
-#             self.workers.imap(
-#                 # lambda x: x.area,
-#                 functools.partial(_getattr, name="area"),
-#                 self
-#             )
-#         )
-        all_areas = list(self.workers.imap(functools.partial(_getattr, name="area"), self))
-        self.feedback.pushInfo(str(all_areas))
-        total_area = sum(all_areas)
+        total_area = sum(
+            self.workers.imap_unordered(
+                # lambda x: x.area,
+                functools.partial(_getattr, name="area"),
+                self
+            )
+        )
         return total_area
 
     @property
     def total_error(self):
         area_value_ratio = self.total_area / self.total_value
-        self.feedback.pushInfo("{:0.1f} = {:0.1f} / {:0.1f}".format(area_value_ratio, self.total_area, self.total_value))
         for feature in self:
             feature.area_value_ratio = area_value_ratio
         total_error = sum(
-            self.workers.imap(
+            self.workers.imap_unordered(
                 # lambda x: x.sizeerror,
                 functools.partial(_getattr, name="sizeerror"),
                 self
             )
         )
         return total_error
+
+    @property
+    @functools.cache
+    def total_number_of_vertices(self):
+        return sum(1 for _ in self.vertices)
 
     @property
     @functools.cache
@@ -144,27 +156,23 @@ class CartogramFeatures:
         return total_value
 
     def transform(self, max_iterations=10, max_average_error=0.1):
-        self.feedback.setProgress(1)  # so it’s clear we’re doing something
-        total_number_of_vertices = len(list(self.vertices))
         iteration = 0
         average_error = self.average_error
-        #for feature in self:
-        #    self.feedback.pushInfo("{:s}: {:0.1f}, {:0.1f}, {:0.1f}".format(feature.wkt[:10], feature.sizeerror, feature.area, feature.mass))
 
         while (
                 iteration < max_iterations
                 and average_error > max_average_error
                 and not self.feedback.isCanceled()
         ):
-            self.feedback.pushInfo("iteration {:d}, average error: {:0.1f}".format(iteration, average_error))
             reduction_factor = 1.0 / (average_error + 1)
-            transformed_vertices = self.workers.starmap(
-                CartogramFeatures.transformVertex,
-                zip(
-                    self.vertices,
-                    itertools.repeat(list(self.features)),
-                    itertools.repeat(reduction_factor)
-                )
+            transformed_vertices = self.workers.imap_unordered(
+                functools.partial(
+                    CartogramFeatures.transformVertex,
+                    features=list(self.features),
+                    reduction_factor=reduction_factor
+                ),
+                self.vertices,
+                chunksize=self._chunksize
             )
 
             number_of_vertices_processed = 0
@@ -174,22 +182,20 @@ class CartogramFeatures:
                 number_of_vertices_processed += 1
                 self.feedback.setProgress(
                     (
-                        (iteration * total_number_of_vertices)  # completed iterations
-                        + number_of_vertices_processed  # current iteration
-                        + 1  # the head start at the top of this function
+                        (
+                            (iteration * self.total_number_of_vertices)  # completed iterations
+                            + number_of_vertices_processed  # current iteration
+                        )
+                        / (self.total_number_of_vertices * max_iterations)  # expected overall vertex ops
                     )
-                    / (total_number_of_vertices * max_iterations)  # expected overall vertex ops
+                    * 100  # percentage
                 )
 
             for feature in self:
-                # invalidate the geometry of each features, so that it is reconstructed
+                # invalidate the geometry of each feature,
+                # to force reconstructing it
                 # from the changed set of vertices
-                try:
-                    del feature._wkt
-                    del feature._area
-                except AttributeError as exception:
-                    self.feedback.pushInfo("Could not delete wkt of feature {:d}: {:s}".format(feature_id, repr(exception)))
-                    pass
+                feature.wkt = None
 
             iteration += 1
             average_error = self.average_error
@@ -221,10 +227,6 @@ class CartogramFeatures:
 
                 x += (x0 - cx) * force
                 y += (y0 - cy) * force
-
-#                 # just quickly checking whether clipping to bounds would work
-#                 x = ((x + 180.0) % 360.0) - 180.0
-#                 y = ((y + 90.0) % 180.0) - 90.0
 
         return feature_id, part, ring, vertex, (x, y)
 

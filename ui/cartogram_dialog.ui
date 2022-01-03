@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
-    <height>384</height>
+    <width>600</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,17 +21,23 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="1">
+    <widget class="QgsMapLayerComboBox" name="layerComboBox"/>
+   </item>
    <item row="1" column="0">
     <widget class="QLabel" name="fieldListViewLabel">
+     <property name="toolTip">
+      <string>To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.</string>
+     </property>
      <property name="text">
-      <string>Field(s):</string>
+      <string>Field:</string>
      </property>
     </widget>
    </item>
    <item row="1" column="1">
     <widget class="QgsFieldListView" name="fieldListView">
      <property name="selectionMode">
-      <enum>QAbstractItemView::ExtendedSelection</enum>
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
     </widget>
    </item>
@@ -104,7 +110,7 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -113,9 +119,6 @@
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QgsMapLayerComboBox" name="layerComboBox"/>
    </item>
   </layout>
  </widget>

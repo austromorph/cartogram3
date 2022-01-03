@@ -9,7 +9,7 @@ import os.path
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QLabel, QPushButton, QProgressBar
+from qgis.PyQt.QtWidgets import QAction, QLabel, QMessageBox, QPushButton, QProgressBar
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import Qgis, QgsMapLayer, QgsProject, QgsWkbTypes
 from qgis.gui import QgsMessageBarItem
@@ -104,9 +104,7 @@ class CartogramUserInterfaceMixIn:
             .findLayer(self.input_layer)
             .setItemVisibilityChecked(False)
         )
-
-        if self.have_all_tasks_finished():
-            self.clean_up_ui()
+        self.clean_up_ui()
 
     def add_sample_dataset_clicked(self, message_bar_item=None):
         try:
@@ -129,6 +127,24 @@ class CartogramUserInterfaceMixIn:
             self._cancel_button.setEnabled(False)
         except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
             pass
+
+    def confirm_if_geographic_crs(self, input_layer):
+        if input_layer.sourceCrs().isGeographic():
+            return (
+                QMessageBox.question(
+                    None,
+                    self.tr("Geographic CRS"),
+                    self.tr(
+                        "Computing a cartogram for a layer with a "
+                        + "geographic CRS might not yield best results "
+                        + "(consider reprojecting the layer to a "
+                        + "projected coordinate system). \n\n"
+                        + "Do you want to proceed?"
+                    )
+                ) == QMessageBox.Yes
+            )
+        else:
+            return True
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -202,7 +218,7 @@ class CartogramUserInterfaceMixIn:
             message_bar_item.layout().addWidget(progress_bar)
 
             cancel_button = QPushButton(self.tr("Cancel"))
-            cancel_button.clicked.connect(self.cancel_all_tasks)
+            cancel_button.clicked.connect(self.cancel_task)
             message_bar_item.layout().addWidget(cancel_button)
 
             self.iface.messageBar().pushWidget(message_bar_item)
@@ -239,7 +255,7 @@ class CartogramUserInterfaceMixIn:
 
     def show_dialog(self):
         """Show the main dialog of this plugin."""
-        if not self.has_active_tasks():
+        if not self.is_task_running():
             if self.project_has_polygon_layers():
                 self.dialog.show()
                 if self.dialog.exec_():
@@ -248,16 +264,16 @@ class CartogramUserInterfaceMixIn:
                     max_iterations = self.dialog.iterationsSpinBox.value()
                     max_average_error = self.dialog.averageErrorDoubleSpinBox.value()
 
-                    self.update_progress_bar(0)
-
-                    self.start_tasks(
-                        input_layer,
-                        selected_fields,
-                        max_iterations,
-                        max_average_error
-                    )
-                    # remember, so we can later copy metadata etc.
-                    self.input_layer = input_layer
+                    if self.confirm_if_geographic_crs(input_layer):
+                        self.update_progress_bar(0)
+                        self.start_task(
+                            input_layer,
+                            selected_fields[0],
+                            max_iterations,
+                            max_average_error
+                        )
+                        # remember, so we can later copy metadata etc.
+                        self.input_layer = input_layer
             else:
                 self.offer_to_add_sample_dataset()
 
