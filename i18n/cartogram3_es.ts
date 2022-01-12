@@ -99,12 +99,12 @@
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="30"/>
         <source>To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.</source>
-        <translation type="unfinished"></translation>
+        <translation>Para calcular cartogramas para más que un campo, por favor utilice la funcionalidad de lotes de la caja de herramientas de Proceso.</translation>
     </message>
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="33"/>
         <source>Field:</source>
-        <translation type="unfinished"></translation>
+        <translation>Campo</translation>
     </message>
 </context>
 <context>
@@ -112,47 +112,47 @@
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="59"/>
         <source>Compute cartogram</source>
-        <translation type="unfinished">Preparar cartograma</translation>
+        <translation>Preparar cartograma</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="53"/>
         <source>Vector geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Geometría vectorial</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="62"/>
         <source>Input layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa de entrada</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="103"/>
         <source>Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Campo</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="77"/>
         <source>max. number of iterations</source>
-        <translation type="unfinished"></translation>
+        <translation>max. iteraciones</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="85"/>
         <source>max. average error (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>error promedio max.</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="96"/>
         <source>Output layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Capa alineada</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="109"/>
         <source>Iterations needed to meet residual error threshold.</source>
-        <translation type="unfinished"></translation>
+        <translation>Iteraciones que eran necesarias para alcanzar al deseado error residual</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="115"/>
         <source>Residual average error.</source>
-        <translation type="unfinished"></translation>
+        <translation>promedia error residual</translation>
     </message>
 </context>
 <context>
@@ -160,7 +160,7 @@
     <message>
         <location filename="../lib/cartogramprocessingprovider.py" line="25"/>
         <source>Cartogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Cartograma</translation>
     </message>
 </context>
 <context>
@@ -168,59 +168,61 @@
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="94"/>
         <source>Cartogram of {:s}, distorted using ‘{:s}’</source>
-        <translation type="unfinished"></translation>
+        <translation>Cartograma de «{:s}», distorsionada por el campo «{:s}»</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="126"/>
         <source>Cancelled</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelado</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="151"/>
         <source>&amp;Cartogram</source>
-        <translation type="unfinished">&amp;Cartograma</translation>
+        <translation>&amp;Cartograma</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="156"/>
         <source>Compute cartogram</source>
-        <translation type="unfinished">Preparar cartograma</translation>
+        <translation>Preparar cartograma</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="193"/>
         <source>Add sample dataset</source>
-        <translation type="unfinished">Añadir datos de muestra</translation>
+        <translation>Añadir datos de muestra</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="185"/>
         <source>Error</source>
-        <translation type="unfinished">Error</translation>
+        <translation>Error</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="187"/>
         <source>You need at least one polygon vector layer to create a cartogram.</source>
-        <translation type="unfinished">Para preparar un cartograma se necesita al menos una capa vectorial de polígonos.</translation>
+        <translation>Para preparar un cartograma se necesita al menos una capa vectorial de polígonos.</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="211"/>
         <source>Computing cartogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Preparando cartograma</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="220"/>
         <source>Cancel</source>
-        <translation type="unfinished">Cancelar</translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
         <source>Geographic CRS</source>
-        <translation type="unfinished"></translation>
+        <translation>Sistema de referencia de coordenadas geográficas</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
         <source>Computing a cartogram for a layer with a geographic CRS might not yield best results (consider reprojecting the layer to a projected coordinate system). 
 
 Do you want to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>La preparacion de una cartograma para una capa vectorial en sistema referencial de coordenadas geográficas no siempre da buenos resultados. Recommendamos convertir la capa por un sistema de coordenadas proyectadas.
+
+¿Continuar de toda manera?</translation>
     </message>
 </context>
 <context>
