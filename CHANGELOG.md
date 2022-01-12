@@ -2,6 +2,7 @@ Change Log
 ==========
 * __3.1.2__ (2022-01-12):
     * solved half of issue 29 (no progress on certain input layers)
+    * added warning dialog concerning the other half of issue 29
     * updated translations
     * moved batch operations to processing toolbox (simplified plugin dialog)
     * a few smaller fixes
