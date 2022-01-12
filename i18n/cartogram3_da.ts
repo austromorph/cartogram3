@@ -99,12 +99,12 @@
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="30"/>
         <source>To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.</source>
-        <translation type="unfinished"></translation>
+        <translation>Hvis du vil beregne kartogrammer for flere felter, skal du bruge batchfunktionaliteten i Processing toolbox.</translation>
     </message>
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="33"/>
         <source>Field:</source>
-        <translation type="unfinished"></translation>
+        <translation>Felt:</translation>
     </message>
 </context>
 <context>
@@ -112,47 +112,47 @@
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="59"/>
         <source>Compute cartogram</source>
-        <translation type="unfinished">Opret cartogram</translation>
+        <translation>Opret kartogram</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="53"/>
         <source>Vector geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Vektorgeometri</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="62"/>
         <source>Input layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Inputlag</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="103"/>
         <source>Field</source>
-        <translation type="unfinished"></translation>
+        <translation>Felt</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="77"/>
         <source>max. number of iterations</source>
-        <translation type="unfinished"></translation>
+        <translation>max. iterationer</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="85"/>
         <source>max. average error (%)</source>
-        <translation type="unfinished"></translation>
+        <translation>max. gennemsnitlig fejl (%)</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="96"/>
         <source>Output layer</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartogram</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="109"/>
         <source>Iterations needed to meet residual error threshold.</source>
-        <translation type="unfinished"></translation>
+        <translation>Iterationer, der er nødvendige for at opfylde tærsklen for restfejl.</translation>
     </message>
     <message>
         <location filename="../lib/cartogramprocessingalgorithm.py" line="115"/>
         <source>Residual average error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Resterende gennemsnitsfejl.</translation>
     </message>
 </context>
 <context>
@@ -160,7 +160,7 @@
     <message>
         <location filename="../lib/cartogramprocessingprovider.py" line="25"/>
         <source>Cartogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartogram</translation>
     </message>
 </context>
 <context>
@@ -168,59 +168,61 @@
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="94"/>
         <source>Cartogram of {:s}, distorted using ‘{:s}’</source>
-        <translation type="unfinished"></translation>
+        <translation>Kartogram af »{:s}«, forvrænget i henhold til feltet »{:s}«</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="126"/>
         <source>Cancelled</source>
-        <translation type="unfinished"></translation>
+        <translation>Annulleret</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="151"/>
         <source>&amp;Cartogram</source>
-        <translation type="unfinished">&amp;Cartogram</translation>
+        <translation>&amp;Kartogram</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="156"/>
         <source>Compute cartogram</source>
-        <translation type="unfinished">Opret cartogram</translation>
+        <translation>Opret kartogram</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="193"/>
         <source>Add sample dataset</source>
-        <translation type="unfinished">Tilføj eksempeldata</translation>
+        <translation>Tilføj eksempeldata</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="185"/>
         <source>Error</source>
-        <translation type="unfinished">Fejl</translation>
+        <translation>Fejl</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="187"/>
         <source>You need at least one polygon vector layer to create a cartogram.</source>
-        <translation type="unfinished">Du skal bruge mindst ét vektorlag for at kunne oprette et cartogram.</translation>
+        <translation>Du skal bruge mindst ét vektorlag for at kunne oprette et cartogram.</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="211"/>
         <source>Computing cartogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Beregner kartogram</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="220"/>
         <source>Cancel</source>
-        <translation type="unfinished">Annuller</translation>
+        <translation>Annuller</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
         <source>Geographic CRS</source>
-        <translation type="unfinished"></translation>
+        <translation>Geografiske Koordinatsystem</translation>
     </message>
     <message>
         <location filename="../lib/cartogramuserinterfacemixin.py" line="133"/>
         <source>Computing a cartogram for a layer with a geographic CRS might not yield best results (consider reprojecting the layer to a projected coordinate system). 
 
 Do you want to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>Beregning af et kartogram for et lag med et geografisk koordinatsystem giver måske ikke de bedste resultater (overvej at reprojicere laget til et projiceret koordinatsystem). 
+
+Fortsætte alligevel?</translation>
     </message>
 </context>
 <context>
