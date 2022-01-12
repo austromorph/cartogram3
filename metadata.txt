@@ -1,6 +1,6 @@
 [general]
 name=cartogram3
-version=3.1.1
+version=3.1.2
 hasProcessingProvider=yes
 
 category=Vector
@@ -24,6 +24,11 @@ qgisMinimumVersion=3.16.12
 qgisMaximumVersion=3.99
 
 changelog=
+    3.1.2 (2022-01-12):
+        - solved half of issue 29 (no progress on certain input layers)
+        - updated translations
+        - moved batch operations to processing toolbox (simplified plugin dialog)
+        - a few smaller fixes
     3.1.1 (2021-12-16):
         - fixed regressions (issues 24, 27; residual error reporting, cancel button)
         - progress bar now more fine-grained

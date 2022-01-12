@@ -1,5 +1,10 @@
 Change Log 
 ==========
+* __3.1.2__ (2022-01-12):
+    * solved half of issue 29 (no progress on certain input layers)
+    * updated translations
+    * moved batch operations to processing toolbox (simplified plugin dialog)
+    * a few smaller fixes
 * __3.1.1__ (2021-12-16):
     * fixed regressions (issues 24, 27; residual error reporting, cancel button)
     * progress bar now more fine-grained
