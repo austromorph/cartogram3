@@ -143,14 +143,16 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         # first, copy all features to a temporary layer
         # we use a zero-width buffer algorithm to do this,
         # in order to fix potential invalid geometries at the same time
-        memory_layer = processing.run(
-            "native:buffer", {
-                "INPUT": input_layer,
-                "DISTANCE": 0.0,
-                "OUTPUT": "memory:"
-            },
-            context=context,
-            feedback=feedback
+        memory_layer = context.getMapLayer(
+            processing.run(
+                "native:buffer", {
+                    "INPUT": parameters[self.INPUT],
+                    "DISTANCE": 0.0,
+                    "OUTPUT": "memory:"
+                },
+                context=context,
+                is_child_algorithm=True
+            )["OUTPUT"]
         )
 
         cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name, feedback)
@@ -162,15 +164,17 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
         # We are sometimes left with slithers and polygons misshaped in other ways,
         # a zero-buffer around them works well
-        buffered_layer = processing.run(
-            "native:buffer", {
-                "INPUT": memory_layer,
-                "DISTANCE": 0.0,
-                "OUTPUT": "memory:"
-            },
-            context=context,
-            feedback=feedback
-        )["OUTPUT"]
+        buffered_layer = context.getMapLayer(
+            processing.run(
+                "native:buffer", {
+                    "INPUT": memory_layer,
+                    "DISTANCE": 0.0,
+                    "OUTPUT": "memory:"
+                },
+                context=context,
+                is_child_algorithm=True
+            )["OUTPUT"]
+        )
 
         # finally, copy features to the output sink
         for feature in buffered_layer.getFeatures():
