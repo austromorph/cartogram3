@@ -6,53 +6,52 @@
     <message>
         <location filename="../cartogram3.py" line="112"/>
         <source>&amp;cartogram3</source>
-        <translation type="obsolete">&amp;Kartogramm</translation>
+        <translation>&amp;Kartogramm</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="209"/>
         <source>Compute cartogram</source>
-        <translation type="obsolete">Kartogramm berechnen</translation>
+        <translation>Kartogramm berechnen</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="111"/>
         <source>&amp;Cartogram</source>
-        <translation type="obsolete">&amp;Kartogramm</translation>
+        <translation>&amp;Kartogramm</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="485"/>
         <source>Error</source>
-        <translation type="obsolete">Fehler</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="279"/>
         <source>You need at least one polygon vector layer to create a cartogram.</source>
-        <translation type="obsolete">Für die Berechnung eines Kartogramms ist mindestens ein Polygon-Vektorlayer erforderlich.</translation>
+        <translation>Für die Berechnung eines Kartogramms ist mindestens ein Polygon-Vektorlayer erforderlich.</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="357"/>
         <source>Cancel</source>
-        <translation type="obsolete">Abbrechen</translation>
+        <translation>Abbrechen</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="466"/>
         <source>cartogram3 successfully finished computing a cartogram for field ‘{fieldName}’ after {iterations} iterations with {avgError:.2n}% average error remaining.</source>
-        <translation type="obsolete">cartogram3: Kartogrammberechnung für Attribut ‚{fieldName}‘ nach {iterations} Durchgängen erfolgreich, verbleibender mittlerer Fehler: {avgError:.2n}%.</translation>
+        <translation>cartogram3: Kartogrammberechnung für Attribut ‚{fieldName}‘ nach {iterations} Durchgängen erfolgreich, verbleibender mittlerer Fehler: {avgError:.2n}%.</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="477"/>
         <source>cartogram3 computation cancelled by user</source>
-        <translation type="obsolete">cartogram3: Berechnung vom Benutzer abgebrochen</translation>
+        <translation>cartogram3: Berechnung vom Benutzer abgebrochen</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="485"/>
         <source>An error occurred during cartogram creation. Please see the ‘Plugins’ section of the message log for details.</source>
-        <translation type="obsolete">Fehler bei der Kartogrammberechnung. Einzelheiten im Fehlerprotokoll unter „Plugins“.
-</translation>
+        <translation>Fehler bei der Kartogrammberechnung. Einzelheiten im Fehlerprotokoll unter „Plugins“.</translation>
     </message>
     <message>
         <location filename="../cartogram3.py" line="286"/>
         <source>Add sample dataset</source>
-        <translation type="obsolete">Beispieldatensatz hinzufügen</translation>
+        <translation>Beispieldatensatz hinzufügen</translation>
     </message>
 </context>
 <context>
@@ -70,7 +69,7 @@
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="27"/>
         <source>Field(s):</source>
-        <translation type="obsolete">Attribut(e):</translation>
+        <translation>Attribut(e):</translation>
     </message>
     <message>
         <location filename="../ui/cartogram_dialog.ui" line="47"/>
@@ -231,7 +230,7 @@ Trotzdem fortfahren?</translation>
     <message>
         <location filename="../cartogram_worker.py" line="103"/>
         <source>Iteration {i}/{mI} for field ‘{fN}’</source>
-        <translation type="obsolete">Durchgang {i}/{mI} für Attribut ‚{fN}‘</translation>
+        <translation>Durchgang {i}/{mI} für Attribut ‚{fN}‘</translation>
     </message>
 </context>
 </TS>
