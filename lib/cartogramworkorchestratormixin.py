@@ -11,18 +11,11 @@ from qgis.core import (
     QgsProcessingAlgRunnerTask,
     QgsProcessingContext,
     QgsProcessingFeedback,
-    QgsTask,
     QgsVectorLayer,
     QgsWkbTypes
 )
 
 from . import CartogramProcessingProvider
-
-
-class DummyParentTask(QgsTask):
-    """Dummy QgsTask to serve as a parent to SubTasks that actually do work."""
-    def run(self):
-        pass
 
 
 class CartogramWorkOrchestratorMixIn:
