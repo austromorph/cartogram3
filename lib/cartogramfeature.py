@@ -33,8 +33,8 @@ class CartogramFeature:
                 value of the field that defines the distortion of the cartogram
         """
         self.id = feature_id
-        self.wkt = wkt
         self.crs = crs
+        self.wkt = wkt
         self.value = value
         self._force_multipolygon = (wkt[:12].upper() == "MULTIPOLYGON")
 
@@ -112,19 +112,14 @@ class CartogramFeature:
 
     @property
     def wkt(self):
-        try:
-            return self._wkt
-        except AttributeError:
+        if not self._wkt:
             self._wkt = self._vertices.as_wkt(self._force_multipolygon)
-            return self._wkt
+        return self._wkt
 
     @wkt.setter
     def wkt(self, wkt):
         self._wkt = wkt
-        try:
-            del self._area, self._radius, self._cx, self._cy
-        except AttributeError:
-            pass
+        self._recompute_area_radius_centroid()
 
     def _recompute_mass_sizeerror(self):
         target_area = self.value * self._area_value_ratio
@@ -145,7 +140,10 @@ class CartogramFeature:
         crs = QgsCoordinateReferenceSystem.fromProj(self.crs)
         distance_area_calculator = QgsDistanceArea()
         distance_area_calculator.setSourceCrs(crs, QgsCoordinateTransformContext())
-        distance_area_calculator.setEllipsoid("WGS84")
+        if not crs.isGeographic():
+            # we want to keep the same units as the coordinates
+            # (and setEllipsoid will make measureArea return meters)
+            distance_area_calculator.setEllipsoid("WGS84")
 
         # recompute area
         self._area = distance_area_calculator.measureArea(geometry)

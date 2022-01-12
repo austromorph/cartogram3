@@ -24,27 +24,20 @@ class CartogramWorkOrchestratorMixIn:
         """Manage the tasks of the plugin’s workers."""
         super(CartogramWorkOrchestratorMixIn, self).__init__()
         self.add_processing_provider()
-        self.tasks = []
-        self.context = QgsProcessingContext()
-        self.feedback = QgsProcessingFeedback()
 
     def add_processing_provider(self):
         self.provider = CartogramProcessingProvider()
         QgsApplication.processingRegistry().addProvider(self.provider)
 
-    def cancel_all_tasks(self):
+    def cancel_task(self):
         self.disable_cancel_button()
-        for task in self.tasks:
-            task.cancel()
+        self.task.cancel()
 
-    def has_active_tasks(self):
-        for task in self.tasks:
-            if task.isActive():
-                return True
-        return False
-
-    def have_all_tasks_finished(self):
-        return not self.has_active_tasks()
+    def is_task_running(self):
+        try:
+            return self.task.isActive()
+        except (AttributeError, RuntimeError):  # (no self.task)
+            return False
 
     def remove_processing_provider(self):
         QgsApplication.processingRegistry().removeProvider(self.provider)
@@ -90,7 +83,9 @@ class CartogramWorkOrchestratorMixIn:
         return sample_layer
 
     def start_task(self, input_layer, field, max_iterations, max_average_error):
-        task = QgsProcessingAlgRunnerTask(
+        self.context = QgsProcessingContext()
+        self.feedback = QgsProcessingFeedback()
+        self.task = QgsProcessingAlgRunnerTask(
             QgsApplication.processingRegistry().algorithmById("cartogram3:compute_cartogram"),
             {
                 "INPUT": input_layer,
@@ -102,17 +97,9 @@ class CartogramWorkOrchestratorMixIn:
             self.context,
             self.feedback
         )
-        task.executed.connect(self.task_finished)
-        task.progressChanged.connect(self.update_progress)
-        QgsApplication.taskManager().addTask(task)
-        return task  # , context, feedback
-
-    def start_tasks(self, input_layer, fields, max_iterations, max_average_error):
-        # create a fresh feedback and context (so we don’t stay in isCanceled(), for instance)
-        self.context = QgsProcessingContext()
-        self.feedback = QgsProcessingFeedback()
-        for field in fields:
-            self.tasks.append(self.start_task(input_layer, field, max_iterations, max_average_error))
+        self.task.executed.connect(self.task_finished)
+        self.feedback.progressChanged.connect(self.update_progress)
+        QgsApplication.taskManager().addTask(self.task)
 
     def task_finished(self, successful, results={}):
         if successful:
@@ -136,11 +123,7 @@ class CartogramWorkOrchestratorMixIn:
                 self.feedback.pushWarning("User canceled cartogram computation")
             self.feedback.reportError("Failed to compute cartogram")
 
-        if self.have_all_tasks_finished():
-            self.tasks = []
-
         self.clean_up_ui()  # remove progress bar
 
-    def update_progress(self, *args, **kwargs):
-        progress = sum([task.progress() for task in self.tasks]) / len(self.tasks)
+    def update_progress(self, progress):
         self.update_progress_bar(progress)
