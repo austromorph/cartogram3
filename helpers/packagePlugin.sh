@@ -19,6 +19,8 @@ fi
 
 cd "${pluginDir}"/..
 
+find -type d -name __pycache__ | xargs rm -Rfv
+
 zip \
 	-9 \
 	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "${pluginDir}")/helpers/$(basename "$0")" \
