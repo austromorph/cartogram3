@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __3.1.3__ (2022-02-21):
+    * run on old-ish Python versions (relax min. version)
 * __3.1.2__ (2022-01-12):
     * solved half of issue 29 (no progress on certain input layers)
     * added warning dialog concerning the other half of issue 29

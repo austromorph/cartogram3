@@ -25,6 +25,14 @@ elif platform.system() == "Darwin":
     multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
 
 
+# monkey-patch functools for older Python versions
+# (e.g. installed with QGIS 3.16 on MacOS)
+if "cache" not in dir(functools):
+    def _cache(user_function, /):
+        return functools.lru_cache(maxsize=None)(user_function)
+    functools.cache = _cache
+
+
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
     def __init__(self, feedback=QgsProcessingFeedback()):
