@@ -1,6 +1,6 @@
 [general]
 name=cartogram3
-version=3.1.3
+version=3.1.4
 hasProcessingProvider=yes
 
 category=Vector
@@ -24,7 +24,9 @@ qgisMinimumVersion=3.16.0
 qgisMaximumVersion=3.99
 
 changelog=
-    3.1.3
+    3.1.4 (2022-04-12):
+        - run on even older Python versions (issue #38)
+    3.1.3 (2022-02-21):
         - run on old-ish Python versions (relax min. version)
     3.1.2 (2022-01-12):
         - solved half of issue 29 (no progress on certain input layers)

@@ -5,7 +5,6 @@
 
 
 import functools
-import itertools
 import math
 import multiprocessing
 import os.path
@@ -28,7 +27,7 @@ elif platform.system() == "Darwin":
 # monkey-patch functools for older Python versions
 # (e.g. installed with QGIS 3.16 on MacOS)
 if "cache" not in dir(functools):
-    def _cache(user_function, /):
+    def _cache(user_function):
         return functools.lru_cache(maxsize=None)(user_function)
     functools.cache = _cache
 

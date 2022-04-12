@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __3.1.4__ (2022-04-12):
+    * run on even older Python versions (issue #38)
 * __3.1.3__ (2022-02-21):
     * run on old-ish Python versions (relax min. version)
 * __3.1.2__ (2022-01-12):
