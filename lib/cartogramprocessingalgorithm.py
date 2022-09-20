@@ -17,8 +17,6 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
-    QgsVectorLayer,
-    QgsWkbTypes
 )
 
 from .cartogramfeatures import CartogramFeatures
