@@ -1,5 +1,8 @@
 Change Log 
 ==========
+* __3.1.5__ (2022-09-21):
+    * detect NULL values in input data set, prompt user (#39)
+    * new UI for warnings/errors (QgsMessageBar within plugin dialog)
 * __3.1.4__ (2022-04-12):
     * run on even older Python versions (issue #38)
 * __3.1.3__ (2022-02-21):
