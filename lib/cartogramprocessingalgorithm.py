@@ -6,7 +6,7 @@
 
 from qgis import processing
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import (
+from qgis.core import (  # noqa: F401
     QgsFeatureSink,
     QgsProcessing,
     QgsProcessingAlgorithm,
@@ -17,6 +17,8 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
+    QgsVectorLayer,
+    QgsWkbTypes,
 )
 
 from .cartogramfeatures import CartogramFeatures
