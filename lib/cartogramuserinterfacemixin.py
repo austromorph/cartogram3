@@ -7,14 +7,16 @@
 import functools
 import os.path
 
+from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QLabel, QMessageBox, QPushButton, QProgressBar
+from qgis.PyQt.QtWidgets import QAction, QLabel, QPushButton, QProgressBar
 from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import Qgis, QgsMapLayer, QgsProject, QgsWkbTypes
 from qgis.gui import QgsMessageBarItem
 
 from ..ui import CartogramDialog
+from .cartogramprocessingalgorithm import CartogramProcessingAlgorithm
 
 
 class CartogramUserInterfaceMixIn:
@@ -113,6 +115,71 @@ class CartogramUserInterfaceMixIn:
             pass
         QgsProject.instance().addMapLayer(self.sample_layer())
 
+    def check_dialog_input(self, *args, **kwargs):
+        """
+        Sanity check user’s dialog input.
+
+        Make sure that
+          1) a field is selected
+          2) that field does not have NULL values
+          3) the selected layer is not in geographic CRS
+
+        Displays appropriate QgsMessagebar to warn the user,
+        and enables/disables the dialog’s OK button depending
+        on the state of input values.
+        """
+        ok_button = self.dialog.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
+        layer = self.dialog.layerComboBox.currentLayer()
+        try:
+            field_name = self.dialog.fieldListView.selectedFields()[0]
+        except IndexError:
+            # no field selected
+            field_name = None
+
+        # remove warning if any
+        self.dialog.messageBar.clearWidgets()
+
+        if field_name is None:
+            # 1) no field selected -> block OK button
+            ok_button.setEnabled(False)
+
+        elif CartogramProcessingAlgorithm.field_has_null_values(layer, field_name):
+            # 2) selected field has NULL values
+            ok_button.setEnabled(False)
+
+            message_bar_item = QgsMessageBarItem(
+                self.tr("NULL values found"),
+                self.tr(
+                    f"Column ‘{field_name}’ of ‘{layer.name()}’ "
+                    "contains NULL values. <br />"
+                    "Remove features with NULL values before proceeding."
+                )
+            )
+            message_bar_item.children()[2].setStyleSheet(
+                message_bar_item.children()[2].styleSheet().replace("max-height: 1.75em;", "max-height: 3.5em;")
+            )
+            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Critical)
+
+        elif layer.sourceCrs().isGeographic():
+            # 3) layer has geographic CRS
+            ok_button.setEnabled(True)
+
+            message_bar_item = QgsMessageBarItem(
+                self.tr("Geographic CRS"),
+                self.tr(
+                    "Computing a cartogram for a layer with a "
+                    "geographic CRS might not yield best results. <br />"
+                    "Consider reprojecting the layer to a "
+                    "projected coordinate system."
+                )
+            )
+            message_bar_item.children()[2].setStyleSheet(
+                message_bar_item.children()[2].styleSheet().replace("max-height: 1.75em;", "max-height: 3.5em;")
+            )
+            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Warning)
+        else:
+            ok_button.setEnabled(True)
+
     def clean_up_ui(self):
         try:
             del self._progress_bar
@@ -127,24 +194,6 @@ class CartogramUserInterfaceMixIn:
             self._cancel_button.setEnabled(False)
         except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
             pass
-
-    def confirm_if_geographic_crs(self, input_layer):
-        if input_layer.sourceCrs().isGeographic():
-            return (
-                QMessageBox.question(
-                    None,
-                    self.tr("Geographic CRS"),
-                    self.tr(
-                        "Computing a cartogram for a layer with a "
-                        + "geographic CRS might not yield best results "
-                        + "(consider reprojecting the layer to a "
-                        + "projected coordinate system). \n\n"
-                        + "Do you want to proceed?"
-                    )
-                ) == QMessageBox.Yes
-            )
-        else:
-            return True
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
@@ -167,6 +216,10 @@ class CartogramUserInterfaceMixIn:
             parent=self.iface.mainWindow()
         )
 
+        self.dialog.fieldListView.selectionModel().selectionChanged.connect(
+            self.check_dialog_input
+        )
+
     def init_translations(self):
         userLocale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
@@ -180,16 +233,35 @@ class CartogramUserInterfaceMixIn:
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
 
+    _input_check_message_bar_item = None
+
     def offer_to_add_sample_dataset(self):
         """Display an error message in message bar that offers to add a sample dataset."""
-        message_bar_item = self.iface.messageBar().createMessage(self.tr("Error"))
+    #     message_bar_item = self.iface.messageBar().createMessage(
+    #         self.tr("Compute Cartogram")
+    #     )
 
-        label = QLabel(
+    #     label = QLabel(
+    #         self.tr("You need at least one polygon vector layer to create a cartogram.")
+    #     )
+    #     label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+    #     message_bar_item.layout().addWidget(label)
+
+    #     button = QPushButton(self.tr("Add sample dataset"))
+    #     button.clicked.connect(
+    #         functools.partial(
+    #             self.add_sample_dataset_clicked,
+    #             message_bar_item=message_bar_item
+    #         )
+    #     )
+    #     message_bar_item.layout().addWidget(button)
+
+    #     self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
+        button = QPushButton(self.tr("Add sample dataset"))
+        message_bar_item = QgsMessageBarItem(
+            self.tr("Compute Cartogram"),
             self.tr("You need at least one polygon vector layer to create a cartogram.")
         )
-        label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        message_bar_item.layout().addWidget(label)
-
         button = QPushButton(self.tr("Add sample dataset"))
         button.clicked.connect(
             functools.partial(
@@ -198,7 +270,6 @@ class CartogramUserInterfaceMixIn:
             )
         )
         message_bar_item.layout().addWidget(button)
-
         self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
 
     @property
@@ -258,22 +329,22 @@ class CartogramUserInterfaceMixIn:
         if not self.is_task_running():
             if self.project_has_polygon_layers():
                 self.dialog.show()
+
                 if self.dialog.exec_():
                     input_layer = self.dialog.layerComboBox.currentLayer()
                     selected_fields = self.dialog.fieldListView.selectedFields()
                     max_iterations = self.dialog.iterationsSpinBox.value()
                     max_average_error = self.dialog.averageErrorDoubleSpinBox.value()
 
-                    if self.confirm_if_geographic_crs(input_layer):
-                        self.update_progress_bar(0)
-                        self.start_task(
-                            input_layer,
-                            selected_fields[0],
-                            max_iterations,
-                            max_average_error
-                        )
-                        # remember, so we can later copy metadata etc.
-                        self.input_layer = input_layer
+                    self.update_progress_bar(0)
+                    self.start_task(
+                        input_layer,
+                        selected_fields[0],
+                        max_iterations,
+                        max_average_error
+                    )
+                    # remember, so we can later copy metadata etc.
+                    self.input_layer = input_layer
             else:
                 self.offer_to_add_sample_dataset()
 

@@ -5,8 +5,8 @@
 
 
 from qgis import processing
-from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import (  # noqa: F401
+from qgis.PyQt.QtCore import QCoreApplication, QVariant
+from qgis.core import (
     QgsFeatureSink,
     QgsProcessing,
     QgsProcessingAlgorithm,
@@ -17,8 +17,6 @@ from qgis.core import (  # noqa: F401
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
-    QgsVectorLayer,
-    QgsWkbTypes,
 )
 
 from .cartogramfeatures import CartogramFeatures
@@ -48,6 +46,38 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
     def displayName(self):
         return self.tr("Compute cartogram")
+
+    @staticmethod
+    def field_has_null_values(layer, field_name):
+        """
+        Checks if field `field_name` of `layer` has NULL values.
+
+        Arguments
+        ---------
+        layer : QgsFeatureSource
+            Check this layer’s fields
+        field_name : str
+            Check this field
+
+        Returns
+        -------
+        bool
+            True if NULL values in field `field_name` of layer, False if not.
+        """
+        for feature in layer.getFeatures():
+            # NULL check is slightly complex, because
+            # QgsFeature’s field values can come as
+            # Python native types (float, int, ...) or
+            # as QVariants
+            if (
+                (
+                    isinstance(feature[field_name], QVariant)
+                    and feature[field_name].isNull()
+                )
+                or feature[field_name] is None
+            ):
+                return True
+        return False
 
     def group(self):
         return self.tr("Vector geometry")
@@ -125,6 +155,15 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
         field_name = self.parameterAsFields(parameters, self.FIELD, context)[0]
+        if self.field_has_null_values(input_layer, field_name):
+            raise QgsProcessingException(
+                self.tr(
+                    f"Field ‘{field_name:s}‘ of input layer ‘{input_layer.sourceName():s}’ "
+                    "contains NULL values. \n"
+                    "This is unsupported and leads to unexpected results."
+                )
+            )
+
         max_iterations = self.parameterAsInt(parameters, self.MAX_ITERATIONS, context)
         max_average_error = self.parameterAsDouble(parameters, self.MAX_AVERAGE_ERROR, context)
         max_average_error = (max_average_error / 100.0 + 1.0)  # input = percentage
