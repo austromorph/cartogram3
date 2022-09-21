@@ -15,7 +15,7 @@ from qgis.PyQt.QtXml import QDomDocument
 from qgis.core import Qgis, QgsMapLayer, QgsProject, QgsWkbTypes
 from qgis.gui import QgsMessageBarItem
 
-from ..ui import CartogramDialog
+from ..ui import CartogramDialog, QgsMessageBarItemDoubleHeight
 from .cartogramprocessingalgorithm import CartogramProcessingAlgorithm
 
 
@@ -147,7 +147,7 @@ class CartogramUserInterfaceMixIn:
             # 2) selected field has NULL values
             ok_button.setEnabled(False)
 
-            message_bar_item = QgsMessageBarItem(
+            message_bar_item = QgsMessageBarItemDoubleHeight(
                 self.tr("NULL values found"),
                 self.tr(
                     f"Column ‘{field_name}’ of ‘{layer.name()}’ "
@@ -155,16 +155,13 @@ class CartogramUserInterfaceMixIn:
                     "Remove features with NULL values before proceeding."
                 )
             )
-            message_bar_item.children()[2].setStyleSheet(
-                message_bar_item.children()[2].styleSheet().replace("max-height: 1.75em;", "max-height: 3.5em;")
-            )
             self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Critical)
 
         elif layer.sourceCrs().isGeographic():
             # 3) layer has geographic CRS
             ok_button.setEnabled(True)
 
-            message_bar_item = QgsMessageBarItem(
+            message_bar_item = QgsMessageBarItemDoubleHeight(
                 self.tr("Geographic CRS"),
                 self.tr(
                     "Computing a cartogram for a layer with a "
@@ -172,9 +169,6 @@ class CartogramUserInterfaceMixIn:
                     "Consider reprojecting the layer to a "
                     "projected coordinate system."
                 )
-            )
-            message_bar_item.children()[2].setStyleSheet(
-                message_bar_item.children()[2].styleSheet().replace("max-height: 1.75em;", "max-height: 3.5em;")
             )
             self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Warning)
         else:

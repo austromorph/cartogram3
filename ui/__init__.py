@@ -21,7 +21,9 @@
 __all__ = [
     "CartogramDialog",
     "QgsFieldListView"
+    "QgsMessageBarItemDoubleHeight"
 ]
 
-from .qgsfieldlistview import QgsFieldListView
 from .cartogramdialog import CartogramDialog
+from .qgsfieldlistview import QgsFieldListView
+from .qgsmessagebaritemdoubleheight import QgsMessageBarItemDoubleHeight
