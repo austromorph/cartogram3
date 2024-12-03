@@ -1,6 +1,6 @@
 [general]
 name=cartogram3
-version=3.1.5
+version=3.2.0
 hasProcessingProvider=yes
 
 category=Vector
@@ -22,8 +22,11 @@ icon=img/icon.png
 
 qgisMinimumVersion=3.16.0
 qgisMaximumVersion=3.99
+supportsQt6=True
 
 changelog=
+    3.2.0 (2024-12-03):
+        - support for PyQt6
     3.1.5 (2022-09-21):
         - detect NULL values in input data set, prompt user (#39)
         - new UI for warnings/errors (QgsMessageBar within plugin dialog)

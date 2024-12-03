@@ -1,5 +1,7 @@
 Change Log 
 ==========
+* __3.2.0__ (2024-12-03):
+    * support for PyQt6
 * __3.1.5__ (2022-09-21):
     * detect NULL values in input data set, prompt user (#39)
     * new UI for warnings/errors (QgsMessageBar within plugin dialog)
