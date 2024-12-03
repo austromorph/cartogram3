@@ -11,6 +11,7 @@ from qgis.PyQt import QtWidgets
 
 class QgsMessageBarItemDoubleHeight(QgsMessageBarItem):
     """A QgsMessageBarItem that has double the height."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -18,7 +19,6 @@ class QgsMessageBarItemDoubleHeight(QgsMessageBarItem):
             if isinstance(child, QtWidgets.QTextBrowser):
                 child.setStyleSheet(
                     child.styleSheet().replace(
-                        "max-height: 1.75em;",
-                        "max-height: 3.5em;"
+                        "max-height: 1.75em;", "max-height: 3.5em;"
                     )
                 )

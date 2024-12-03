@@ -7,6 +7,7 @@ from qgis.core import QgsVertexId
 
 class Vertices:
     """Vertices that belong to a geometry."""
+
     def __init__(self, geometry):
         """
         Vertices that belong to a geometry.
@@ -63,22 +64,14 @@ class Vertices:
         for part in self._vertices:
             rings = []
             for ring in part:
-                vertices = ", ".join(
-                    (
-                        "{:f} {:f}".format(*vertex)
-                        for vertex in ring
-                    )
-                )
+                vertices = ", ".join(("{:f} {:f}".format(*vertex) for vertex in ring))
                 rings.append("({:s})".format(vertices))
             rings = ", ".join(rings)
             parts.append("({:s})".format(rings))
 
         if len(parts) > 1 or force_multipolygon:
             wkt = "MULTIPOLYGON({:s})".format(
-                ", ".join([
-                    "({:s})".format(part)
-                    for part in parts
-                ])
+                ", ".join(["({:s})".format(part) for part in parts])
             )
         else:
             wkt = "POLYGON({:s})".format(parts[0])
@@ -86,9 +79,13 @@ class Vertices:
 
     @staticmethod
     def _vertex_id(part, ring, vertex):
-        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.SegmentVertex)
+        vertex_id = QgsVertexId(
+            part, ring, vertex, QgsVertexId.VertexType.SegmentVertex
+        )
         if not vertex_id.isValid():
-            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.CurveVertex)
+            vertex_id = QgsVertexId(
+                part, ring, vertex, QgsVertexId.VertexType.CurveVertex
+            )
             if not vertex_id.isValid():
                 raise ValueError("Invalid vertex addressing.")
         return vertex_id

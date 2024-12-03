@@ -19,23 +19,35 @@ class Ui_CartogramDialog(object):
         self.formLayout.setObjectName("formLayout")
         self.messageBar = gui.QgsMessageBar(CartogramDialog)
         self.messageBar.setObjectName("messageBar")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.SpanningRole, self.messageBar)
+        self.formLayout.setWidget(
+            0, QtWidgets.QFormLayout.SpanningRole, self.messageBar
+        )
         self.layerComboBoxLabel = QtWidgets.QLabel(CartogramDialog)
         self.layerComboBoxLabel.setObjectName("layerComboBoxLabel")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.layerComboBoxLabel)
+        self.formLayout.setWidget(
+            1, QtWidgets.QFormLayout.LabelRole, self.layerComboBoxLabel
+        )
         self.layerComboBox = gui.QgsMapLayerComboBox(CartogramDialog)
         self.layerComboBox.setObjectName("layerComboBox")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.layerComboBox)
+        self.formLayout.setWidget(
+            1, QtWidgets.QFormLayout.FieldRole, self.layerComboBox
+        )
         self.fieldListViewLabel = QtWidgets.QLabel(CartogramDialog)
         self.fieldListViewLabel.setObjectName("fieldListViewLabel")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.fieldListViewLabel)
+        self.formLayout.setWidget(
+            2, QtWidgets.QFormLayout.LabelRole, self.fieldListViewLabel
+        )
         self.fieldListView = QgsFieldListView(CartogramDialog)
         self.fieldListView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.fieldListView.setObjectName("fieldListView")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.fieldListView)
+        self.formLayout.setWidget(
+            2, QtWidgets.QFormLayout.FieldRole, self.fieldListView
+        )
         self.stopConditionsFrameLabel = QtWidgets.QLabel(CartogramDialog)
         self.stopConditionsFrameLabel.setObjectName("stopConditionsFrameLabel")
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.stopConditionsFrameLabel)
+        self.formLayout.setWidget(
+            3, QtWidgets.QFormLayout.LabelRole, self.stopConditionsFrameLabel
+        )
         self.stopConditionsFrame = QtWidgets.QFrame(CartogramDialog)
         self.stopConditionsFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.stopConditionsFrame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -44,48 +56,83 @@ class Ui_CartogramDialog(object):
         self.formLayout_2.setObjectName("formLayout_2")
         self.iterationsSpinBoxLabel = QtWidgets.QLabel(self.stopConditionsFrame)
         self.iterationsSpinBoxLabel.setObjectName("iterationsSpinBoxLabel")
-        self.formLayout_2.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.iterationsSpinBoxLabel)
+        self.formLayout_2.setWidget(
+            1, QtWidgets.QFormLayout.LabelRole, self.iterationsSpinBoxLabel
+        )
         self.iterationsSpinBox = QtWidgets.QSpinBox(self.stopConditionsFrame)
         self.iterationsSpinBox.setMinimum(1)
         self.iterationsSpinBox.setMaximum(9999)
         self.iterationsSpinBox.setProperty("value", 10)
         self.iterationsSpinBox.setObjectName("iterationsSpinBox")
-        self.formLayout_2.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.iterationsSpinBox)
+        self.formLayout_2.setWidget(
+            1, QtWidgets.QFormLayout.FieldRole, self.iterationsSpinBox
+        )
         self.averageErrorDoubleSpinBoxLabel = QtWidgets.QLabel(self.stopConditionsFrame)
-        self.averageErrorDoubleSpinBoxLabel.setObjectName("averageErrorDoubleSpinBoxLabel")
-        self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.averageErrorDoubleSpinBoxLabel)
-        self.averageErrorDoubleSpinBox = QtWidgets.QDoubleSpinBox(self.stopConditionsFrame)
+        self.averageErrorDoubleSpinBoxLabel.setObjectName(
+            "averageErrorDoubleSpinBoxLabel"
+        )
+        self.formLayout_2.setWidget(
+            2, QtWidgets.QFormLayout.LabelRole, self.averageErrorDoubleSpinBoxLabel
+        )
+        self.averageErrorDoubleSpinBox = QtWidgets.QDoubleSpinBox(
+            self.stopConditionsFrame
+        )
         self.averageErrorDoubleSpinBox.setSingleStep(0.5)
         self.averageErrorDoubleSpinBox.setProperty("value", 10.0)
         self.averageErrorDoubleSpinBox.setObjectName("averageErrorDoubleSpinBox")
-        self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.averageErrorDoubleSpinBox)
+        self.formLayout_2.setWidget(
+            2, QtWidgets.QFormLayout.FieldRole, self.averageErrorDoubleSpinBox
+        )
         self.conditionsExplanationLabel = QtWidgets.QLabel(self.stopConditionsFrame)
         self.conditionsExplanationLabel.setWordWrap(True)
         self.conditionsExplanationLabel.setObjectName("conditionsExplanationLabel")
-        self.formLayout_2.setWidget(0, QtWidgets.QFormLayout.SpanningRole, self.conditionsExplanationLabel)
-        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.stopConditionsFrame)
+        self.formLayout_2.setWidget(
+            0, QtWidgets.QFormLayout.SpanningRole, self.conditionsExplanationLabel
+        )
+        self.formLayout.setWidget(
+            3, QtWidgets.QFormLayout.FieldRole, self.stopConditionsFrame
+        )
         self.buttonBox = QtWidgets.QDialogButtonBox(CartogramDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(
+            QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok
+        )
         self.buttonBox.setObjectName("buttonBox")
         self.formLayout.setWidget(4, QtWidgets.QFormLayout.SpanningRole, self.buttonBox)
 
         self.retranslateUi(CartogramDialog)
-        self.buttonBox.accepted.connect(CartogramDialog.accept) # type: ignore
-        self.buttonBox.rejected.connect(CartogramDialog.reject) # type: ignore
-        self.layerComboBox.layerChanged['QgsMapLayer*'].connect(self.fieldListView.setLayer) # type: ignore
+        self.buttonBox.accepted.connect(CartogramDialog.accept)  # type: ignore
+        self.buttonBox.rejected.connect(CartogramDialog.reject)  # type: ignore
+        self.layerComboBox.layerChanged["QgsMapLayer*"].connect(self.fieldListView.setLayer)  # type: ignore
         QtCore.QMetaObject.connectSlotsByName(CartogramDialog)
 
     def retranslateUi(self, CartogramDialog):
         _translate = QtCore.QCoreApplication.translate
         CartogramDialog.setWindowTitle(_translate("CartogramDialog", "cartogram3"))
         self.layerComboBoxLabel.setText(_translate("CartogramDialog", "Input layer:"))
-        self.fieldListViewLabel.setToolTip(_translate("CartogramDialog", "To compute cartograms for multiple fields, please use the Processing toolbox batch functionality."))
+        self.fieldListViewLabel.setToolTip(
+            _translate(
+                "CartogramDialog",
+                "To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.",
+            )
+        )
         self.fieldListViewLabel.setText(_translate("CartogramDialog", "Field:"))
-        self.stopConditionsFrameLabel.setText(_translate("CartogramDialog", "Stop conditions:"))
-        self.iterationsSpinBoxLabel.setText(_translate("CartogramDialog", "max. number of iterations:"))
-        self.averageErrorDoubleSpinBoxLabel.setText(_translate("CartogramDialog", "max. average error:"))
+        self.stopConditionsFrameLabel.setText(
+            _translate("CartogramDialog", "Stop conditions:")
+        )
+        self.iterationsSpinBoxLabel.setText(
+            _translate("CartogramDialog", "max. number of iterations:")
+        )
+        self.averageErrorDoubleSpinBoxLabel.setText(
+            _translate("CartogramDialog", "max. average error:")
+        )
         self.averageErrorDoubleSpinBox.setSuffix(_translate("CartogramDialog", "%"))
-        self.conditionsExplanationLabel.setText(_translate("CartogramDialog", "Calculation stops as soon as one condition is met."))
+        self.conditionsExplanationLabel.setText(
+            _translate(
+                "CartogramDialog", "Calculation stops as soon as one condition is met."
+            )
+        )
+
+
 from qgis import gui
 from cartogram3.ui.qgsfieldlistview import QgsFieldListView

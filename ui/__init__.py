@@ -18,11 +18,7 @@
 
 """Files that define the user interface."""
 
-__all__ = [
-    "CartogramDialog",
-    "QgsFieldListView"
-    "QgsMessageBarItemDoubleHeight"
-]
+__all__ = ["CartogramDialog", "QgsFieldListView" "QgsMessageBarItemDoubleHeight"]
 
 from .cartogramdialog import CartogramDialog
 from .qgsfieldlistview import QgsFieldListView

@@ -9,5 +9,5 @@ from .cartogramworkorchestratormixin import CartogramWorkOrchestratorMixIn
 __all__ = [
     "CartogramProcessingProvider",
     "CartogramUserInterfaceMixIn",
-    "CartogramWorkOrchestratorMixIn"
+    "CartogramWorkOrchestratorMixIn",
 ]

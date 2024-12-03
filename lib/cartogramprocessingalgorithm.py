@@ -70,12 +70,9 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             # Python native types (float, int, ...) or
             # as QVariants
             if (
-                (
-                    isinstance(feature[field_name], QVariant)
-                    and feature[field_name].isNull()
-                )
-                or feature[field_name] is None
-            ):
+                isinstance(feature[field_name], QVariant)
+                and feature[field_name].isNull()
+            ) or feature[field_name] is None:
                 return True
         return False
 
@@ -93,7 +90,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr("Input layer"),
-                [QgsProcessing.SourceType.TypeVectorPolygon]
+                [QgsProcessing.SourceType.TypeVectorPolygon],
             )
         )
         self.addParameter(
@@ -101,7 +98,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.FIELD,
                 self.tr("Field"),
                 type=QgsProcessingParameterField.DataType.Numeric,
-                parentLayerParameterName=self.INPUT
+                parentLayerParameterName=self.INPUT,
             )
         )
         self.addParameter(
@@ -109,7 +106,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.MAX_ITERATIONS,
                 self.tr("max. number of iterations"),
                 type=QgsProcessingParameterNumber.Type.Integer,
-                defaultValue=10
+                defaultValue=10,
             )
         )
         self.addParameter(
@@ -120,39 +117,35 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 # metadata={"widget_wrapper": {"decimals": 2}},
                 minValue=0.1,
                 defaultValue=10.0,
-                maxValue=100.0
+                maxValue=100.0,
             )
         )
         self.addParameter(
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr("Output layer"),
-                type=QgsProcessing.SourceType.TypeVectorPolygon
+                type=QgsProcessing.SourceType.TypeVectorPolygon,
             )
         )
-        self.addOutput(
-            QgsProcessingOutputString(
-                self.FIELD,
-                self.tr("Field")
-            )
-        )
+        self.addOutput(QgsProcessingOutputString(self.FIELD, self.tr("Field")))
         self.addOutput(
             QgsProcessingOutputNumber(
                 self.ITERATIONS,
-                self.tr("Iterations needed to meet residual error threshold.")
+                self.tr("Iterations needed to meet residual error threshold."),
             )
         )
         self.addOutput(
             QgsProcessingOutputNumber(
-                self.RESIDUAL_AVERAGE_ERROR,
-                self.tr("Residual average error.")
+                self.RESIDUAL_AVERAGE_ERROR, self.tr("Residual average error.")
             )
         )
 
     def processAlgorithm(self, parameters, context, feedback):
         input_layer = self.parameterAsSource(parameters, self.INPUT, context)
         if input_layer is None:
-            raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
+            raise QgsProcessingException(
+                self.invalidSourceError(parameters, self.INPUT)
+            )
 
         field_name = self.parameterAsFields(parameters, self.FIELD, context)[0]
         if self.field_has_null_values(input_layer, field_name):
@@ -165,8 +158,10 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             )
 
         max_iterations = self.parameterAsInt(parameters, self.MAX_ITERATIONS, context)
-        max_average_error = self.parameterAsDouble(parameters, self.MAX_AVERAGE_ERROR, context)
-        max_average_error = (max_average_error / 100.0 + 1.0)  # input = percentage
+        max_average_error = self.parameterAsDouble(
+            parameters, self.MAX_AVERAGE_ERROR, context
+        )
+        max_average_error = max_average_error / 100.0 + 1.0  # input = percentage
 
         output_layer, output_layer_id = self.parameterAsSink(
             parameters,
@@ -174,7 +169,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             context,
             input_layer.fields(),
             input_layer.wkbType(),
-            input_layer.sourceCrs()
+            input_layer.sourceCrs(),
         )
         if output_layer is None:
             raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
@@ -184,20 +179,18 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         # in order to fix potential invalid geometries at the same time
         memory_layer = context.getMapLayer(
             processing.run(
-                "native:buffer", {
-                    "INPUT": parameters[self.INPUT],
-                    "DISTANCE": 0.0,
-                    "OUTPUT": "memory:"
-                },
+                "native:buffer",
+                {"INPUT": parameters[self.INPUT], "DISTANCE": 0.0, "OUTPUT": "memory:"},
                 context=context,
-                is_child_algorithm=True
+                is_child_algorithm=True,
             )["OUTPUT"]
         )
 
-        cartogram_features = CartogramFeatures.from_polygon_layer(memory_layer, field_name, feedback)
+        cartogram_features = CartogramFeatures.from_polygon_layer(
+            memory_layer, field_name, feedback
+        )
         iterations, average_error = cartogram_features.transform(
-            max_iterations,
-            max_average_error
+            max_iterations, max_average_error
         )
         cartogram_features.copy_geometries_back_to_layer(memory_layer)
 
@@ -205,13 +198,10 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         # a zero-buffer around them works well
         buffered_layer = context.getMapLayer(
             processing.run(
-                "native:buffer", {
-                    "INPUT": memory_layer,
-                    "DISTANCE": 0.0,
-                    "OUTPUT": "memory:"
-                },
+                "native:buffer",
+                {"INPUT": memory_layer, "DISTANCE": 0.0, "OUTPUT": "memory:"},
                 context=context,
-                is_child_algorithm=True
+                is_child_algorithm=True,
             )["OUTPUT"]
         )
 
@@ -223,5 +213,5 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT: output_layer_id,
             self.FIELD: field_name,
             self.ITERATIONS: iterations,
-            self.RESIDUAL_AVERAGE_ERROR: (average_error - 1) * 100.0  # we report in %
+            self.RESIDUAL_AVERAGE_ERROR: (average_error - 1) * 100.0,  # we report in %
         }
