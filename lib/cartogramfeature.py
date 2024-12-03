@@ -161,9 +161,9 @@ class CartogramFeature:
 
     @staticmethod
     def _vertex_id(part, ring, vertex):
-        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.SegmentVertex)
+        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.SegmentVertex)
         if not vertex_id.IsValid():
-            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.CurveVertex)
+            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.CurveVertex)
             if not vertex_id.IsValid():
                 raise ValueError("Invalid vertex addressing.")
         return vertex_id

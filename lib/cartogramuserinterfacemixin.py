@@ -297,8 +297,8 @@ class CartogramUserInterfaceMixIn:
         """Check whether the user added at least one polygon layer."""
         for layer in QgsProject.instance().mapLayers().values():
             if (
-                    layer.type() == QgsMapLayer.VectorLayer
-                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                    layer.type() == QgsMapLayer.LayerType.VectorLayer
+                    and layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry
             ):
                 return True
         return False
@@ -324,7 +324,7 @@ class CartogramUserInterfaceMixIn:
             if self.project_has_polygon_layers():
                 self.dialog.show()
 
-                if self.dialog.exec_():
+                if self.dialog.exec():
                     input_layer = self.dialog.layerComboBox.currentLayer()
                     selected_fields = self.dialog.fieldListView.selectedFields()
                     max_iterations = self.dialog.iterationsSpinBox.value()

@@ -93,14 +93,14 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 self.tr("Input layer"),
-                [QgsProcessing.TypeVectorPolygon]
+                [QgsProcessing.SourceType.TypeVectorPolygon]
             )
         )
         self.addParameter(
             QgsProcessingParameterField(
                 self.FIELD,
                 self.tr("Field"),
-                type=QgsProcessingParameterField.Numeric,
+                type=QgsProcessingParameterField.DataType.Numeric,
                 parentLayerParameterName=self.INPUT
             )
         )
@@ -108,7 +108,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX_ITERATIONS,
                 self.tr("max. number of iterations"),
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=10
             )
         )
@@ -116,7 +116,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX_AVERAGE_ERROR,
                 self.tr("max. average error (%)"),
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 # metadata={"widget_wrapper": {"decimals": 2}},
                 minValue=0.1,
                 defaultValue=10.0,
@@ -127,7 +127,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSink(
                 self.OUTPUT,
                 self.tr("Output layer"),
-                type=QgsProcessing.TypeVectorPolygon
+                type=QgsProcessing.SourceType.TypeVectorPolygon
             )
         )
         self.addOutput(

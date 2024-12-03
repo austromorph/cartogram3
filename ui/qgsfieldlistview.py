@@ -83,7 +83,7 @@ class QgsFieldListView(QListView):
             return ""
         name = self.mFieldProxyModel.data(
             proxyIndex,
-            QgsFieldModel.FieldNameRole
+            QgsFieldModel.CustomRole.FieldNameRole
         )
         return name
 

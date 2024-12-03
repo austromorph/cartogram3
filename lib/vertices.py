@@ -86,9 +86,9 @@ class Vertices:
 
     @staticmethod
     def _vertex_id(part, ring, vertex):
-        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.SegmentVertex)
+        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.SegmentVertex)
         if not vertex_id.isValid():
-            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.CurveVertex)
+            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.VertexType.CurveVertex)
             if not vertex_id.isValid():
                 raise ValueError("Invalid vertex addressing.")
         return vertex_id
