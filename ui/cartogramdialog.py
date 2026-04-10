@@ -19,7 +19,7 @@ class CartogramDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # filter ui: polygon layers, numeric fields only
         self.layerComboBox.setFilters(QgsMapLayerProxyModel.Filter.PolygonLayer)
-        self.fieldListView.setFilters(QgsFieldProxyModel.Numeric)
+        self.fieldListView.setFilters(QgsFieldProxyModel.Filter.Numeric)
 
         # sync fieldListView with layerComboBox
         self.layerComboBox.layerChanged.emit(self.layerComboBox.currentLayer())

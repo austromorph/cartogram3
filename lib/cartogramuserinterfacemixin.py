@@ -126,7 +126,9 @@ class CartogramUserInterfaceMixIn:
         and enables/disables the dialog’s OK button depending
         on the state of input values.
         """
-        ok_button = self.dialog.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
+        ok_button = self.dialog.buttonBox.button(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+        )
         layer = self.dialog.layerComboBox.currentLayer()
         try:
             field_name = self.dialog.fieldListView.selectedFields()[0]
@@ -153,7 +155,9 @@ class CartogramUserInterfaceMixIn:
                     "Remove features with NULL values before proceeding."
                 ),
             )
-            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Critical)
+            self.dialog.messageBar.pushWidget(
+                message_bar_item, Qgis.MessageLevel.Critical
+            )
 
         elif layer.sourceCrs().isGeographic():
             # 3) layer has geographic CRS
@@ -168,7 +172,9 @@ class CartogramUserInterfaceMixIn:
                     "projected coordinate system."
                 ),
             )
-            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Warning)
+            self.dialog.messageBar.pushWidget(
+                message_bar_item, Qgis.MessageLevel.Warning
+            )
         else:
             ok_button.setEnabled(True)
 
@@ -250,7 +256,7 @@ class CartogramUserInterfaceMixIn:
             )
         )
         message_bar_item.layout().addWidget(button)
-        self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
+        self.iface.messageBar().pushWidget(message_bar_item, Qgis.MessageLevel.Critical)
 
     @property
     def progress_bar(self):
@@ -260,11 +266,15 @@ class CartogramUserInterfaceMixIn:
             message_bar_item = QgsMessageBarItem("")
 
             label = QLabel(self.tr("Computing cartogram"))
-            label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            label.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
             message_bar_item.layout().addWidget(label)
 
             progress_bar = QProgressBar()
-            progress_bar.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            progress_bar.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
             progress_bar.setMaximum(100)
             message_bar_item.layout().addWidget(progress_bar)
 
@@ -305,6 +315,9 @@ class CartogramUserInterfaceMixIn:
         """Show the main dialog of this plugin."""
         if not self.is_task_running():
             if self.project_has_polygon_layers():
+                self.dialog.layerComboBox.layerChanged.emit(
+                    self.dialog.layerComboBox.currentLayer()
+                )
                 self.dialog.show()
 
                 if self.dialog.exec():

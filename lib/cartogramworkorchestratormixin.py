@@ -72,19 +72,23 @@ class CartogramWorkOrchestratorMixIn:
             os.path.join(self.plugin_dir, "data", "Austria_PopulationByNUTS2.qml")
         )
 
-        sample_layer.setTitle("Austria: Population by NUTS2 regions, 1 Jan 2017")
-        sample_layer.setShortName("Austria_Population_NUTS2_20170101")
-        sample_layer.setAbstract(
+        sample_layer.serverProperties().setTitle(
+            "Austria: Population by NUTS2 regions, 1 Jan 2017"
+        )
+        sample_layer.serverProperties().setShortName(
+            "Austria_Population_NUTS2_20170101"
+        )
+        sample_layer.serverProperties().setAbstract(
             "Austria’s population by NUTS2 region, as of 1 Jan 2017 \n"
-            + "\n"
-            + "Data sources: \n"
-            + "    http://ec.europa.eu/eurostat/web/gisco/geodata/"
-            + "reference-data/administrative-units-statistical-units/"
-            + "nuts#nuts13 \n"
-            + "    http://www.statistik.at/web_de/statistiken/"
-            + "menschen_und_gesellschaft/bevoelkerung/"
-            + "bevoelkerungsstand_und_veraenderung/"
-            + "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
+            "\n"
+            "Data sources: \n"
+            "    http://ec.europa.eu/eurostat/web/gisco/geodata/"
+            "reference-data/administrative-units-statistical-units/"
+            "nuts#nuts13 \n"
+            "    http://www.statistik.at/web_de/statistiken/"
+            "menschen_und_gesellschaft/bevoelkerung/"
+            "bevoelkerungsstand_und_veraenderung/"
+            "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
         )
 
         return sample_layer

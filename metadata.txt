@@ -22,7 +22,6 @@ icon=img/icon.png
 
 qgisMinimumVersion=4.0
 qgisMaximumVersion=4.99
-supportsQt6=True
 
 changelog=
     4.0.0 (2026-04-10):

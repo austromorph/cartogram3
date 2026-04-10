@@ -146,7 +146,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
                 self.invalidSourceError(parameters, self.INPUT)
             )
 
-        field_name = self.parameterAsFields(parameters, self.FIELD, context)[0]
+        field_name = self.parameterAsStrings(parameters, self.FIELD, context)[0]
         if self.field_has_null_values(input_layer, field_name):
             raise QgsProcessingException(
                 self.tr(
@@ -206,7 +206,7 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
 
         # finally, copy features to the output sink
         for feature in buffered_layer.getFeatures():
-            output_layer.addFeature(feature, QgsFeatureSink.FastInsert)
+            output_layer.addFeature(feature, QgsFeatureSink.Flag.FastInsert)
 
         return {
             self.OUTPUT: output_layer_id,
