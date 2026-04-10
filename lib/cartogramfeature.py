@@ -9,7 +9,7 @@ from qgis.core import (
     QgsCoordinateTransformContext,
     QgsDistanceArea,
     QgsGeometry,
-    QgsVertexId
+    QgsVertexId,
 )
 
 from .vertices import Vertices
@@ -17,6 +17,7 @@ from .vertices import Vertices
 
 class CartogramFeature:
     """A pickle-able minimal representation of a QgsGeometry/QgsFeature."""
+
     def __init__(self, feature_id, wkt, crs, value):
         """
         A picke-able minimal representation of a QgsGeometry/QgsFeature.
@@ -36,7 +37,7 @@ class CartogramFeature:
         self.crs = crs
         self.wkt = wkt
         self.value = value
-        self._force_multipolygon = (wkt[:12].upper() == "MULTIPOLYGON")
+        self._force_multipolygon = wkt[:12].upper() == "MULTIPOLYGON"
 
     @property
     def area(self):
@@ -128,10 +129,7 @@ class CartogramFeature:
         else:
             self._mass = math.sqrt(target_area / math.pi) - self.radius
         try:
-            self._sizeerror = (
-                max(self.area, target_area)
-                / min(self.area, target_area)
-            )
+            self._sizeerror = max(self.area, target_area) / min(self.area, target_area)
         except ZeroDivisionError:
             self._sizeerror = 1.0
 
@@ -161,9 +159,19 @@ class CartogramFeature:
 
     @staticmethod
     def _vertex_id(part, ring, vertex):
-        vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.SegmentVertex)
+        vertex_id = QgsVertexId(
+            part,
+            ring,
+            vertex,
+            QgsVertexId.VertexType.SegmentVertex,
+        )
         if not vertex_id.IsValid():
-            vertex_id = QgsVertexId(part, ring, vertex, QgsVertexId.CurveVertex)
+            vertex_id = QgsVertexId(
+                part,
+                ring,
+                vertex,
+                QgsVertexId.VertexType.CurveVertex,
+            )
             if not vertex_id.IsValid():
                 raise ValueError("Invalid vertex addressing.")
         return vertex_id

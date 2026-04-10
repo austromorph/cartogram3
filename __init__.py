@@ -32,4 +32,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .cartogram3 import Cartogram
+
     return Cartogram(iface)

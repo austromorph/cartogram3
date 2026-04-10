@@ -20,18 +20,10 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import (
-    pyqtSignal,
-    pyqtSlot,
-    QItemSelection
-)
-from qgis.PyQt.QtWidgets import (
-    QListView
-)
-from qgis.core import (
-    QgsFieldModel,
-    QgsFieldProxyModel
-)
+
+from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QItemSelection
+from qgis.PyQt.QtWidgets import QListView
+from qgis.core import QgsFieldModel, QgsFieldProxyModel
 
 
 class QgsFieldListView(QListView):
@@ -49,9 +41,7 @@ class QgsFieldListView(QListView):
         self.mFieldProxyModel.setFilters(filters)
 
     def setAllowEmptyFieldName(self, allowEmpty=True):
-        self.mFieldProxyModel.sourceFieldModel().setAllowEmptyFieldName(
-            allowEmpty
-        )
+        self.mFieldProxyModel.sourceFieldModel().setAllowEmptyFieldName(allowEmpty)
 
     def allowEmptyFieldName(self):
         return self.mFieldProxyModel.sourceFieldModel().allowEmptyFieldName()
@@ -61,8 +51,7 @@ class QgsFieldListView(QListView):
         self.mFieldProxyModel.sourceFieldModel().setLayer(layer)
         self.selectionModel().clearSelection()
         self.selectionModel().selectionChanged.emit(
-            QItemSelection(),
-            self.selectionModel().selection()
+            QItemSelection(), self.selectionModel().selection()
         )
 
     def layer(self):
@@ -82,8 +71,7 @@ class QgsFieldListView(QListView):
         if not proxyIndex.isValid():
             return ""
         name = self.mFieldProxyModel.data(
-            proxyIndex,
-            QgsFieldModel.FieldNameRole
+            proxyIndex, QgsFieldModel.CustomRole.FieldNameRole
         )
         return name
 
@@ -102,6 +90,4 @@ class QgsFieldListView(QListView):
 
     @pyqtSlot("QModelIndex")
     def indexChanged(self, idx):
-        self.fieldChanged.emit(
-            self.fieldNameForIndex(idx)
-        )
+        self.fieldChanged.emit(self.fieldNameForIndex(idx))

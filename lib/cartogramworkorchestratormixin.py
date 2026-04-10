@@ -3,7 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-
 import os.path
 
 from qgis.core import (
@@ -12,7 +11,7 @@ from qgis.core import (
     QgsProcessingContext,
     QgsProcessingFeedback,
     QgsVectorLayer,
-    QgsWkbTypes
+    QgsWkbTypes,
 )
 
 from . import CartogramProcessingProvider
@@ -20,6 +19,7 @@ from . import CartogramProcessingProvider
 
 class CartogramWorkOrchestratorMixIn:
     """Manage the tasks of the plugin’s workers."""
+
     def __init__(self):
         """Manage the tasks of the plugin’s workers."""
         super(CartogramWorkOrchestratorMixIn, self).__init__()
@@ -44,17 +44,24 @@ class CartogramWorkOrchestratorMixIn:
 
     def sample_layer(self):
         source_layer = QgsVectorLayer(
-            os.path.join(self.plugin_dir, "data", "Austria_PopulationByNUTS2.gml"),
-            ""
+            os.path.join(
+                self.plugin_dir,
+                "data",
+                "Austria_PopulationByNUTS2.gml",
+            ),
+            "",
         )
 
         # (empty) memory layer
         sample_layer = QgsVectorLayer(
-            QgsWkbTypes.geometryDisplayString(source_layer.geometryType())
-            + "?crs=" + source_layer.crs().authid()
-            + "&index=yes",
+            (
+                QgsWkbTypes.geometryDisplayString(source_layer.geometryType())
+                + "?crs="
+                + source_layer.crs().authid()
+                + "&index=yes"
+            ),
             "Austria_Population_NUTS2_20170101",
-            "memory"
+            "memory",
         )
         sample_layer_data_provider = sample_layer.dataProvider()
         sample_layer_data_provider.addAttributes(source_layer.fields().toList())
@@ -65,19 +72,23 @@ class CartogramWorkOrchestratorMixIn:
             os.path.join(self.plugin_dir, "data", "Austria_PopulationByNUTS2.qml")
         )
 
-        sample_layer.setTitle("Austria: Population by NUTS2 regions, 1 Jan 2017")
-        sample_layer.setShortName("Austria_Population_NUTS2_20170101")
-        sample_layer.setAbstract(
+        sample_layer.serverProperties().setTitle(
+            "Austria: Population by NUTS2 regions, 1 Jan 2017"
+        )
+        sample_layer.serverProperties().setShortName(
+            "Austria_Population_NUTS2_20170101"
+        )
+        sample_layer.serverProperties().setAbstract(
             "Austria’s population by NUTS2 region, as of 1 Jan 2017 \n"
-            + "\n"
-            + "Data sources: \n"
-            + "    http://ec.europa.eu/eurostat/web/gisco/geodata/"
-            + "reference-data/administrative-units-statistical-units/"
-            + "nuts#nuts13 \n"
-            + "    http://www.statistik.at/web_de/statistiken/"
-            + "menschen_und_gesellschaft/bevoelkerung/"
-            + "bevoelkerungsstand_und_veraenderung/"
-            + "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
+            "\n"
+            "Data sources: \n"
+            "    http://ec.europa.eu/eurostat/web/gisco/geodata/"
+            "reference-data/administrative-units-statistical-units/"
+            "nuts#nuts13 \n"
+            "    http://www.statistik.at/web_de/statistiken/"
+            "menschen_und_gesellschaft/bevoelkerung/"
+            "bevoelkerungsstand_und_veraenderung/"
+            "bevoelkerung_zu_jahres-_quartalsanfang/index.html"
         )
 
         return sample_layer
@@ -86,16 +97,18 @@ class CartogramWorkOrchestratorMixIn:
         self.context = QgsProcessingContext()
         self.feedback = QgsProcessingFeedback()
         self.task = QgsProcessingAlgRunnerTask(
-            QgsApplication.processingRegistry().algorithmById("cartogram3:compute_cartogram"),
+            QgsApplication.processingRegistry().algorithmById(
+                "cartogram3:compute_cartogram"
+            ),
             {
                 "INPUT": input_layer,
                 "FIELD": field,
                 "MAX_ITERATIONS": max_iterations,
                 "MAX_AVERAGE_ERROR": max_average_error,
-                "OUTPUT": "memory:"
+                "OUTPUT": "memory:",
             },
             self.context,
-            self.feedback
+            self.feedback,
         )
         self.task.executed.connect(self.task_finished)
         self.feedback.progressChanged.connect(self.update_progress)
@@ -115,7 +128,7 @@ class CartogramWorkOrchestratorMixIn:
                         self.input_layer.name(),
                         results["FIELD"],
                         results["ITERATIONS"],
-                        results["RESIDUAL_AVERAGE_ERROR"]
+                        results["RESIDUAL_AVERAGE_ERROR"],
                     )
                 )
         else:

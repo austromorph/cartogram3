@@ -3,7 +3,6 @@
 
 """Handle a list of `CartogramFeature`."""
 
-
 import functools
 import math
 import multiprocessing
@@ -14,7 +13,6 @@ import sys
 from qgis.core import QgsGeometry, QgsProcessingFeedback
 
 from .cartogramfeature import CartogramFeature
-
 
 if platform.system() == "Windows":
     sys.argv = [os.path.abspath(__file__)]
@@ -27,13 +25,16 @@ elif platform.system() == "Darwin":
 # monkey-patch functools for older Python versions
 # (e.g. installed with QGIS 3.16 on MacOS)
 if "cache" not in dir(functools):
+
     def _cache(user_function):
         return functools.lru_cache(maxsize=None)(user_function)
+
     functools.cache = _cache
 
 
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
+
     def __init__(self, feedback=QgsProcessingFeedback()):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
@@ -59,7 +60,7 @@ class CartogramFeatures:
                 feature_id,
                 feature.geometry().asWkt(),
                 crs,
-                feature[field_name]
+                feature[field_name],
             )
             cartogram_features[feature_id] = cartogram_feature
         return cartogram_features
@@ -93,10 +94,7 @@ class CartogramFeatures:
         """Use this chunksize for multiprocessing.imap() etc..."""
         chunksize = min(
             10000,
-            int(
-                self.total_number_of_vertices
-                / (2 * multiprocessing.cpu_count())
-            )
+            int(self.total_number_of_vertices / (2 * multiprocessing.cpu_count())),
         )
         return chunksize
 
@@ -128,7 +126,7 @@ class CartogramFeatures:
             self.workers.imap_unordered(
                 # lambda x: x.area,
                 functools.partial(_getattr, name="area"),
-                self
+                self,
             )
         )
         return total_area
@@ -142,7 +140,7 @@ class CartogramFeatures:
             self.workers.imap_unordered(
                 # lambda x: x.sizeerror,
                 functools.partial(_getattr, name="sizeerror"),
-                self
+                self,
             )
         )
         return total_error
@@ -159,7 +157,7 @@ class CartogramFeatures:
             self.workers.imap(
                 # lambda x: x.value,
                 functools.partial(_getattr, name="value"),
-                self
+                self,
             )
         )
         return total_value
@@ -169,19 +167,19 @@ class CartogramFeatures:
         average_error = self.average_error
 
         while (
-                iteration < max_iterations
-                and average_error > max_average_error
-                and not self.feedback.isCanceled()
+            iteration < max_iterations
+            and average_error > max_average_error
+            and not self.feedback.isCanceled()
         ):
             reduction_factor = 1.0 / (average_error + 1)
             transformed_vertices = self.workers.imap_unordered(
                 functools.partial(
                     CartogramFeatures.transformVertex,
                     features=list(self.features),
-                    reduction_factor=reduction_factor
+                    reduction_factor=reduction_factor,
                 ),
                 self.vertices,
-                chunksize=self._chunksize
+                chunksize=self._chunksize,
             )
 
             number_of_vertices_processed = 0
@@ -192,10 +190,14 @@ class CartogramFeatures:
                 self.feedback.setProgress(
                     (
                         (
-                            (iteration * self.total_number_of_vertices)  # completed iterations
+                            (
+                                iteration * self.total_number_of_vertices
+                            )  # completed iterations
                             + number_of_vertices_processed  # current iteration
                         )
-                        / (self.total_number_of_vertices * max_iterations)  # expected overall vertex ops
+                        / (
+                            self.total_number_of_vertices * max_iterations
+                        )  # expected overall vertex ops
                     )
                     * 100  # percentage
                 )
@@ -231,7 +233,7 @@ class CartogramFeatures:
                 else:
                     # force on points closer to the centroid
                     dr = distance / feature.radius
-                    force = feature.mass * (dr ** 2) * (4 - (3 * dr))
+                    force = feature.mass * (dr**2) * (4 - (3 * dr))
                 force *= reduction_factor / distance
 
                 x += (x0 - cx) * force

@@ -3,7 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-
 import functools
 import os.path
 
@@ -38,7 +37,7 @@ class CartogramUserInterfaceMixIn:
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None
+        parent=None,
     ):
         """
         Add a toolbar icon to the toolbar.
@@ -94,8 +93,7 @@ class CartogramUserInterfaceMixIn:
         layer_style = QDomDocument()
         self.input_layer.exportNamedStyle(layer_style)
         name = self.tr("Cartogram of {:s}, distorted using ‘{:s}’").format(
-            self.input_layer.name(),
-            field
+            self.input_layer.name(), field
         )
         layer.importNamedStyle(layer_style)
         layer.setName(name)
@@ -128,7 +126,9 @@ class CartogramUserInterfaceMixIn:
         and enables/disables the dialog’s OK button depending
         on the state of input values.
         """
-        ok_button = self.dialog.buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
+        ok_button = self.dialog.buttonBox.button(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+        )
         layer = self.dialog.layerComboBox.currentLayer()
         try:
             field_name = self.dialog.fieldListView.selectedFields()[0]
@@ -153,9 +153,11 @@ class CartogramUserInterfaceMixIn:
                     f"Column ‘{field_name}’ of ‘{layer.name()}’ "
                     "contains NULL values. <br />"
                     "Remove features with NULL values before proceeding."
-                )
+                ),
             )
-            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Critical)
+            self.dialog.messageBar.pushWidget(
+                message_bar_item, Qgis.MessageLevel.Critical
+            )
 
         elif layer.sourceCrs().isGeographic():
             # 3) layer has geographic CRS
@@ -168,9 +170,11 @@ class CartogramUserInterfaceMixIn:
                     "geographic CRS might not yield best results. <br />"
                     "Consider reprojecting the layer to a "
                     "projected coordinate system."
-                )
+                ),
             )
-            self.dialog.messageBar.pushWidget(message_bar_item, Qgis.Warning)
+            self.dialog.messageBar.pushWidget(
+                message_bar_item, Qgis.MessageLevel.Warning
+            )
         else:
             ok_button.setEnabled(True)
 
@@ -179,14 +183,20 @@ class CartogramUserInterfaceMixIn:
             del self._progress_bar
             del self._cancel_button
             self.iface.messageBar().popWidget(self._progress_bar_message_bar_item)
-        except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
+        except (
+            AttributeError,
+            RuntimeError,
+        ):  # ‘wrapped C/C++ object has been deleted’
             pass
 
     def disable_cancel_button(self):
         try:
             self._cancel_button.setText(self.tr("Cancelled"))
             self._cancel_button.setEnabled(False)
-        except (AttributeError, RuntimeError):  # ‘wrapped C/C++ object has been deleted’
+        except (
+            AttributeError,
+            RuntimeError,
+        ):  # ‘wrapped C/C++ object has been deleted’
             pass
 
     def initGui(self):
@@ -200,14 +210,14 @@ class CartogramUserInterfaceMixIn:
             icon_path,
             text=self.tr("Compute cartogram"),
             callback=self.show_dialog,
-            parent=self.iface.mainWindow()
+            parent=self.iface.mainWindow(),
         )
         self.add_action(
             None,
             text=self.tr("Add sample dataset"),
             callback=self.add_sample_dataset_clicked,
             add_to_toolbar=False,
-            parent=self.iface.mainWindow()
+            parent=self.iface.mainWindow(),
         )
 
         self.dialog.fieldListView.selectionModel().selectionChanged.connect(
@@ -219,7 +229,7 @@ class CartogramUserInterfaceMixIn:
         locale_path = os.path.join(
             self.plugin_dir,
             "i18n",
-            "{:s}_{:s}.qm".format(self.PLUGIN_NAME, userLocale)
+            "{:s}_{:s}.qm".format(self.PLUGIN_NAME, userLocale),
         )
 
         if os.path.exists(locale_path):
@@ -231,40 +241,22 @@ class CartogramUserInterfaceMixIn:
 
     def offer_to_add_sample_dataset(self):
         """Display an error message in message bar that offers to add a sample dataset."""
-    #     message_bar_item = self.iface.messageBar().createMessage(
-    #         self.tr("Compute Cartogram")
-    #     )
-
-    #     label = QLabel(
-    #         self.tr("You need at least one polygon vector layer to create a cartogram.")
-    #     )
-    #     label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-    #     message_bar_item.layout().addWidget(label)
-
-    #     button = QPushButton(self.tr("Add sample dataset"))
-    #     button.clicked.connect(
-    #         functools.partial(
-    #             self.add_sample_dataset_clicked,
-    #             message_bar_item=message_bar_item
-    #         )
-    #     )
-    #     message_bar_item.layout().addWidget(button)
-
-    #     self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
         button = QPushButton(self.tr("Add sample dataset"))
         message_bar_item = QgsMessageBarItem(
             self.tr("Compute Cartogram"),
-            self.tr("You need at least one polygon vector layer to create a cartogram.")
+            self.tr(
+                "You need at least one polygon vector layer to create a cartogram."
+            ),
         )
         button = QPushButton(self.tr("Add sample dataset"))
         button.clicked.connect(
             functools.partial(
                 self.add_sample_dataset_clicked,
-                message_bar_item=message_bar_item
+                message_bar_item=message_bar_item,
             )
         )
         message_bar_item.layout().addWidget(button)
-        self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
+        self.iface.messageBar().pushWidget(message_bar_item, Qgis.MessageLevel.Critical)
 
     @property
     def progress_bar(self):
@@ -274,11 +266,15 @@ class CartogramUserInterfaceMixIn:
             message_bar_item = QgsMessageBarItem("")
 
             label = QLabel(self.tr("Computing cartogram"))
-            label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            label.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
             message_bar_item.layout().addWidget(label)
 
             progress_bar = QProgressBar()
-            progress_bar.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            progress_bar.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
             progress_bar.setMaximum(100)
             message_bar_item.layout().addWidget(progress_bar)
 
@@ -297,8 +293,8 @@ class CartogramUserInterfaceMixIn:
         """Check whether the user added at least one polygon layer."""
         for layer in QgsProject.instance().mapLayers().values():
             if (
-                    layer.type() == QgsMapLayer.VectorLayer
-                    and layer.geometryType() == QgsWkbTypes.PolygonGeometry
+                layer.type() == QgsMapLayer.LayerType.VectorLayer
+                and layer.geometryType() == QgsWkbTypes.GeometryType.PolygonGeometry
             ):
                 return True
         return False
@@ -306,10 +302,7 @@ class CartogramUserInterfaceMixIn:
     def remove_actions(self):
         """Remove the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginVectorMenu(
-                self.menu,
-                action
-            )
+            self.iface.removePluginVectorMenu(self.menu, action)
             self.iface.removeToolBarIcon(action)
 
     def save_input_layer_metadata(self, layer):
@@ -322,9 +315,12 @@ class CartogramUserInterfaceMixIn:
         """Show the main dialog of this plugin."""
         if not self.is_task_running():
             if self.project_has_polygon_layers():
+                self.dialog.layerComboBox.layerChanged.emit(
+                    self.dialog.layerComboBox.currentLayer()
+                )
                 self.dialog.show()
 
-                if self.dialog.exec_():
+                if self.dialog.exec():
                     input_layer = self.dialog.layerComboBox.currentLayer()
                     selected_fields = self.dialog.fieldListView.selectedFields()
                     max_iterations = self.dialog.iterationsSpinBox.value()
@@ -335,7 +331,7 @@ class CartogramUserInterfaceMixIn:
                         input_layer,
                         selected_fields[0],
                         max_iterations,
-                        max_average_error
+                        max_average_error,
                     )
                     # remember, so we can later copy metadata etc.
                     self.input_layer = input_layer

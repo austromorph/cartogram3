@@ -3,7 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-
 import os.path
 
 from .lib import CartogramUserInterfaceMixIn, CartogramWorkOrchestratorMixIn
