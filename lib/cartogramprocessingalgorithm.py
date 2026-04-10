@@ -179,7 +179,11 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         memory_layer = context.getMapLayer(
             processing.run(
                 "native:buffer",
-                {"INPUT": parameters[self.INPUT], "DISTANCE": 0.0, "OUTPUT": "memory:"},
+                {
+                    "INPUT": parameters[self.INPUT],
+                    "DISTANCE": 0.0,
+                    "OUTPUT": "memory:",
+                },
                 context=context,
                 is_child_algorithm=True,
             )["OUTPUT"]
@@ -198,7 +202,11 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         buffered_layer = context.getMapLayer(
             processing.run(
                 "native:buffer",
-                {"INPUT": memory_layer, "DISTANCE": 0.0, "OUTPUT": "memory:"},
+                {
+                    "INPUT": memory_layer,
+                    "DISTANCE": 0.0,
+                    "OUTPUT": "memory:",
+                },
                 context=context,
                 is_child_algorithm=True,
             )["OUTPUT"]
