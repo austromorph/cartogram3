@@ -23,7 +23,7 @@ find -type d -name __pycache__ | xargs rm -Rfv
 
 zip \
 	-9 \
-	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '*~' "$(basename "${pluginDir}")/helpers/$(basename "$0")" \
+	-x '*.DS_Store.*' '*.git*' '*.gitignore' '*.pyc' '*.swp' '.flake8' '.pylintrc' '*~' "$(basename "${pluginDir}")/helpers/$(basename "$0")" \
 	-r \
 	"${outputDir}/${pluginName}-${pluginVersion}.zip" \
  	"$(basename "${pluginDir}")"
