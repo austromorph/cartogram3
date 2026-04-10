@@ -3,7 +3,6 @@
 
 """Provide a cartogram algorithm to the processing toolbox."""
 
-
 import os.path
 
 from qgis.PyQt.QtGui import QIcon

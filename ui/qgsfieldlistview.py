@@ -20,6 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+
 from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QItemSelection
 from qgis.PyQt.QtWidgets import QListView
 from qgis.core import QgsFieldModel, QgsFieldProxyModel

@@ -3,7 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-
 import functools
 import os.path
 
@@ -222,7 +221,9 @@ class CartogramUserInterfaceMixIn:
     def init_translations(self):
         userLocale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir, "i18n", "{:s}_{:s}.qm".format(self.PLUGIN_NAME, userLocale)
+            self.plugin_dir,
+            "i18n",
+            "{:s}_{:s}.qm".format(self.PLUGIN_NAME, userLocale),
         )
 
         if os.path.exists(locale_path):
@@ -234,26 +235,6 @@ class CartogramUserInterfaceMixIn:
 
     def offer_to_add_sample_dataset(self):
         """Display an error message in message bar that offers to add a sample dataset."""
-        #     message_bar_item = self.iface.messageBar().createMessage(
-        #         self.tr("Compute Cartogram")
-        #     )
-
-        #     label = QLabel(
-        #         self.tr("You need at least one polygon vector layer to create a cartogram.")
-        #     )
-        #     label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        #     message_bar_item.layout().addWidget(label)
-
-        #     button = QPushButton(self.tr("Add sample dataset"))
-        #     button.clicked.connect(
-        #         functools.partial(
-        #             self.add_sample_dataset_clicked,
-        #             message_bar_item=message_bar_item
-        #         )
-        #     )
-        #     message_bar_item.layout().addWidget(button)
-
-        #     self.iface.messageBar().pushWidget(message_bar_item, Qgis.Critical)
         button = QPushButton(self.tr("Add sample dataset"))
         message_bar_item = QgsMessageBarItem(
             self.tr("Compute Cartogram"),
@@ -264,7 +245,8 @@ class CartogramUserInterfaceMixIn:
         button = QPushButton(self.tr("Add sample dataset"))
         button.clicked.connect(
             functools.partial(
-                self.add_sample_dataset_clicked, message_bar_item=message_bar_item
+                self.add_sample_dataset_clicked,
+                message_bar_item=message_bar_item,
             )
         )
         message_bar_item.layout().addWidget(button)

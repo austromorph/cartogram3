@@ -19,6 +19,7 @@ class QgsMessageBarItemDoubleHeight(QgsMessageBarItem):
             if isinstance(child, QtWidgets.QTextBrowser):
                 child.setStyleSheet(
                     child.styleSheet().replace(
-                        "max-height: 1.75em;", "max-height: 3.5em;"
+                        "max-height: 1.75em;",
+                        "max-height: 3.5em;",
                     )
                 )

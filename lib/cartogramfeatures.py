@@ -3,7 +3,6 @@
 
 """Handle a list of `CartogramFeature`."""
 
-
 import functools
 import math
 import multiprocessing
@@ -14,7 +13,6 @@ import sys
 from qgis.core import QgsGeometry, QgsProcessingFeedback
 
 from .cartogramfeature import CartogramFeature
-
 
 if platform.system() == "Windows":
     sys.argv = [os.path.abspath(__file__)]

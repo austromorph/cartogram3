@@ -3,7 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-
 import os.path
 
 from qgis.core import (
@@ -45,15 +44,22 @@ class CartogramWorkOrchestratorMixIn:
 
     def sample_layer(self):
         source_layer = QgsVectorLayer(
-            os.path.join(self.plugin_dir, "data", "Austria_PopulationByNUTS2.gml"), ""
+            os.path.join(
+                self.plugin_dir,
+                "data",
+                "Austria_PopulationByNUTS2.gml",
+            ),
+            "",
         )
 
         # (empty) memory layer
         sample_layer = QgsVectorLayer(
-            QgsWkbTypes.geometryDisplayString(source_layer.geometryType())
-            + "?crs="
-            + source_layer.crs().authid()
-            + "&index=yes",
+            (
+                QgsWkbTypes.geometryDisplayString(source_layer.geometryType())
+                + "?crs="
+                + source_layer.crs().authid()
+                + "&index=yes"
+            ),
             "Austria_Population_NUTS2_20170101",
             "memory",
         )

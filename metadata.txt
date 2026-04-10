@@ -1,6 +1,6 @@
 [general]
 name=cartogram3
-version=3.2.0
+version=4.0.0
 hasProcessingProvider=yes
 
 category=Vector
@@ -20,11 +20,13 @@ email=christoph@christophfink.com
 
 icon=img/icon.png
 
-qgisMinimumVersion=3.16.0
-qgisMaximumVersion=3.99
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
 supportsQt6=True
 
 changelog=
+    4.0.0 (2026-04-10):
+        - support for QGIS 4.x, PyQt6
     3.2.0 (2024-12-03):
         - support for PyQt6
     3.1.5 (2022-09-21):
