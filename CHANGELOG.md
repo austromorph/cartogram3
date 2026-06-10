@@ -1,5 +1,8 @@
 Change Log 
 ==========
+* __4.0.1__ (2026-06-10):
+    * CI/CD pipeline
+    * adapt linting to plugins.qgis.org rules
 * __4.0.0__ (2026-04-10):
     * support for QGIS 4.x, PyQt6
 * __3.2.0__ (2024-12-03):
