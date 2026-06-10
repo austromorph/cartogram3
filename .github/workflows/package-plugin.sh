@@ -23,11 +23,10 @@ rsync \
     --exclude='*.DS_Store.*' \
     --exclude='*.pyc' \
     --exclude='*.swp' \
-    src/ \
-    build/ 
+    "src/" \
+    "build/${PLUGIN_NAME}/"
 
+cd build/
 zip \
-	-9 \
-	-r \
-	"dist/${PLUGIN_NAME}-${PLUGIN_VERSION}.zip" \
-    "build/"
+	"../dist/${PLUGIN_NAME}-${PLUGIN_VERSION}.zip" \
+    -r "${PLUGIN_NAME}"
