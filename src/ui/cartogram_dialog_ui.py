@@ -127,7 +127,8 @@ class Ui_CartogramDialog(object):
         self.fieldListViewLabel.setToolTip(
             _translate(
                 "CartogramDialog",
-                "To compute cartograms for multiple fields, please use the Processing toolbox batch functionality.",
+                "To compute cartograms for multiple fields, "
+                "please use the Processing toolbox batch functionality.",
             )
         )
         self.fieldListViewLabel.setText(_translate("CartogramDialog", "Field:"))

@@ -2,10 +2,8 @@
 
 """A QgsMessageBarItem that has double the height."""
 
-
 from qgis.gui import QgsMessageBarItem
 from qgis.PyQt import QtWidgets
-
 
 all = ["QgsMessageBarItemDoubleHeight"]
 

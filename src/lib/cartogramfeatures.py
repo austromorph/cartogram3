@@ -35,7 +35,7 @@ if "cache" not in dir(functools):
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
 
-    def __init__(self, feedback=QgsProcessingFeedback()):
+    def __init__(self, feedback=lambda: QgsProcessingFeedback()):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
         self.workers = multiprocessing.get_context("spawn").Pool()
@@ -51,7 +51,7 @@ class CartogramFeatures:
     # instantiator and data output
 
     @staticmethod
-    def from_polygon_layer(layer, field_name, feedback=QgsProcessingFeedback()):
+    def from_polygon_layer(layer, field_name, feedback=lambda: QgsProcessingFeedback()):
         cartogram_features = CartogramFeatures(feedback)
         crs = layer.sourceCrs().toProj()
         for feature in layer.getFeatures():
@@ -88,8 +88,7 @@ class CartogramFeatures:
     def average_error(self):
         return self.total_error / len(self)
 
-    @property
-    @functools.cache
+    @functools.cached_property
     def _chunksize(self):
         """Use this chunksize for multiprocessing.imap() etc..."""
         chunksize = min(
@@ -145,13 +144,11 @@ class CartogramFeatures:
         )
         return total_error
 
-    @property
-    @functools.cache
+    @functools.cached_property
     def total_number_of_vertices(self):
         return sum(1 for _ in self.vertices)
 
-    @property
-    @functools.cache
+    @functools.cached_property
     def total_value(self):
         total_value = sum(
             self.workers.imap(
