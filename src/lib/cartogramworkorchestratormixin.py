@@ -114,7 +114,9 @@ class CartogramWorkOrchestratorMixIn:
         self.feedback.progressChanged.connect(self.update_progress)
         QgsApplication.taskManager().addTask(self.task)
 
-    def task_finished(self, successful, results={}):
+    def task_finished(self, successful, results=None):
+        if results is None:
+            results = {}
         if successful:
             output_layer = self.context.getMapLayer(results["OUTPUT"])
             if output_layer and output_layer.isValid():

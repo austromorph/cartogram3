@@ -24,6 +24,9 @@ qgisMinimumVersion=4.0
 qgisMaximumVersion=4.99
 
 changelog=
+    4.0.1 (2026-06-10):
+        - CI/CD pipeline
+        - adapt linting to plugins.qgis.org rules
     4.0.0 (2026-04-10):
         - support for QGIS 4.x, PyQt6
     3.2.0 (2024-12-03):
