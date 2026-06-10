@@ -24,8 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: | 
-          apt update -y
-          apt install -y rsync zip
+          sudo apt update -y
+          sudo apt install -y rsync zip
       - run:
           bash ./.github/workflows/package-plugin.sh
       - uses: actions/upload-artifact@v6
