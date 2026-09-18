@@ -38,7 +38,11 @@ class CartogramFeatures:
     def __init__(self, feedback=lambda: QgsProcessingFeedback()):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
-        self.workers = multiprocessing.get_context("spawn").Pool()
+        if platform.system() == "Darwin":
+            from multiprocessing.dummy import Pool as ThreadPool
+            self.workers = ThreadPool()
+        else:
+            self.workers = multiprocessing.get_context("spawn").Pool()
         self.feedback = feedback
         self.feedback.canceled.connect(self.stop_workers)
 
