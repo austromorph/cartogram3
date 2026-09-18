@@ -17,9 +17,6 @@ from .cartogramfeature import CartogramFeature
 if platform.system() == "Windows":
     sys.argv = [os.path.abspath(__file__)]
     multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
-elif platform.system() == "Darwin":
-    sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
 
 
 # monkey-patch functools for older Python versions
