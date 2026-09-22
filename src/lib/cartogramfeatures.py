@@ -134,7 +134,7 @@ class CartogramFeatures(QgsParallelWorker):
             reduction_factor = 1.0 / (average_error + 1)
             transformed_vertices = self.imap_unordered(
                 functools.partial(
-                    CartogramFeatures.transformVertex,
+                    CartogramFeatures.transform_vertex,
                     features=list(self.features),
                     reduction_factor=reduction_factor,
                 ),
@@ -174,13 +174,19 @@ class CartogramFeatures(QgsParallelWorker):
         if self.source_layer is not None:
             self.source_layer.startEditing()
             for feature in self.features:
-                self.source_layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
+                self.source_layer.changeGeometry(
+                    feature.id,
+                    QgsGeometry().fromWkt(feature.wkt),
+                )
             self.source_layer.commitChanges()
 
         return iteration, average_error
 
     @staticmethod
-    def transformVertex(vertex, features, reduction_factor):
+    def transform_vertex(
+        vertex, features, reduction_factor
+    ):  # pylint: disable=too-many-locals
+        """Transform the coordinates of one vertex."""
         feature_id, part, ring, vertex, point = vertex
         x0, y0 = point
 

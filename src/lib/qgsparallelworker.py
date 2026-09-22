@@ -3,25 +3,23 @@
 
 """Provide a drop-in replacement for multiprocessing.imap_unordered() using QgsTasks."""
 
-
 import itertools
-import time
 
 from qgis.core import (
     QgsApplication,
     QgsTask,
 )
 
-
 TASK_DESCRIPTION = ""
 
 
-class QgsDummyParentTask(QgsTask):
-    pass
+class QgsDummyParentTask(QgsTask):  # pylint: disable=too-few-public-methods
+    """QgsTask cannot be instantiated directly."""
 
 
 class QgsParallelWorker:
     """Provide a drop-in replacement for multiprocessing.imap_unordered()."""
+
     def __init__(self):
         """Initialise a QgsParallelWorker."""
         self.task = None
@@ -34,6 +32,7 @@ class QgsParallelWorker:
             pass
 
     def imap_unordered(self, func, iterable, /, chunksize=1):
+        """Run `func` for every item in `iterable`"""
         task_manager = QgsApplication.taskManager()
 
         if chunksize > 1:
@@ -67,7 +66,7 @@ class QgsParallelWorker:
                     on_finished=_finished,
                     flags=QgsTask.CanCancel,
                 ),
-                subTaskDependency=QgsTask.ParentDependsOnSubTask
+                subTaskDependency=QgsTask.ParentDependsOnSubTask,
             )
         task_manager.addTask(task)
 
