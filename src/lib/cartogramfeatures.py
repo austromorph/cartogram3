@@ -7,6 +7,7 @@ import functools
 import math
 import multiprocessing
 import os.path
+import pathlib
 import platform
 import sys
 
@@ -19,7 +20,7 @@ if platform.system() == "Windows":
     multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
 elif platform.system() == "Darwin":
     sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
+    multiprocessing.set_executable(pathlib.Path(sys.executable).parent / "python")
 
 
 # monkey-patch functools for older Python versions
@@ -35,12 +36,13 @@ if "cache" not in dir(functools):
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
 
-    def __init__(self, feedback=lambda: QgsProcessingFeedback()):
+    def __init__(self, feedback=lambda: QgsProcessingFeedback(), source_layer=None):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
         self.workers = multiprocessing.get_context("spawn").Pool()
         self.feedback = feedback
         self.feedback.canceled.connect(self.stop_workers)
+        self.source_layer = source_layer
 
     def __del__(self):
         """Take care of the worker pool upon unloading."""
@@ -52,7 +54,7 @@ class CartogramFeatures:
 
     @staticmethod
     def from_polygon_layer(layer, field_name, feedback=lambda: QgsProcessingFeedback()):
-        cartogram_features = CartogramFeatures(feedback)
+        cartogram_features = CartogramFeatures(feedback, source_layer=layer)
         crs = layer.sourceCrs().toProj()
         for feature in layer.getFeatures():
             feature_id = feature.id()
@@ -64,13 +66,6 @@ class CartogramFeatures:
             )
             cartogram_features[feature_id] = cartogram_feature
         return cartogram_features
-
-    def copy_geometries_back_to_layer(self, layer):
-        # this MUST be the same layer as used for `from_polygon_layer`
-        layer.startEditing()
-        for feature in self.features:
-            layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
-        layer.commitChanges()
 
     def __setitem__(self, feature_id, cartogram_feature):
         self._features[feature_id] = cartogram_feature
@@ -207,6 +202,12 @@ class CartogramFeatures:
 
             iteration += 1
             average_error = self.average_error
+
+        if self.source_layer is not None:
+            self.source_layer.startEditing()
+            for feature in self.features:
+                self.source_layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
+            self.source_layer.commitChanges()
 
         return iteration, average_error
 
