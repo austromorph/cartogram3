@@ -7,6 +7,7 @@ import functools
 import math
 import multiprocessing
 import os.path
+import pathlib
 import platform
 import sys
 
@@ -19,7 +20,7 @@ if platform.system() == "Windows":
     multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
 elif platform.system() == "Darwin":
     sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
+    multiprocessing.set_executable(pathlib.Path(sys.executable).parent / "python")
 
 
 # monkey-patch functools for older Python versions
