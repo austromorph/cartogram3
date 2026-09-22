@@ -6,37 +6,23 @@
 import functools
 import math
 import multiprocessing
-import os.path
-import platform
-import sys
 
 from qgis.core import QgsGeometry, QgsProcessingFeedback
 
 from .cartogramfeature import CartogramFeature
-
-if platform.system() == "Windows":
-    sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
-elif platform.system() == "Darwin":
-    sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "bin", "python3"))
+from .qgsparallelworker import QgsParallelWorker
 
 
-class CartogramFeatures:
+class CartogramFeatures(QgsParallelWorker):
     """Handle a list of `CartogramFeature`."""
 
     def __init__(self, feedback=lambda: QgsProcessingFeedback(), source_layer=None):
         """Handle a list of `CartogramFeature`."""
+        super().__init__()
         self._features = {}
-        self.workers = multiprocessing.get_context("spawn").Pool()
         self.feedback = feedback
-        self.feedback.canceled.connect(self.stop_workers)
+        self.feedback.canceled.connect(self.cancel)
         self.source_layer = source_layer
-
-    def __del__(self):
-        """Take care of the worker pool upon unloading."""
-        self.workers.close()
-        del self.workers
 
     # next two methods not alphabetical order, because they’re
     # instantiator and data output
@@ -87,7 +73,7 @@ class CartogramFeatures:
 
     @functools.cached_property
     def _chunksize(self):
-        """Use this chunksize for multiprocessing.imap() etc..."""
+        """Use this chunksize for parallel processing."""
         chunksize = min(
             10000,
             int(self.total_number_of_vertices / (2 * multiprocessing.cpu_count())),
@@ -112,15 +98,10 @@ class CartogramFeatures:
             for part, ring, vertex, point in self._features[feature_id].vertices:
                 yield feature_id, part, ring, vertex, point
 
-    def stop_workers(self, *args, **kwargs):
-        self.workers.terminate()
-        self.workers.join()
-
     @property
     def total_area(self):
         total_area = sum(
-            self.workers.imap_unordered(
-                # lambda x: x.area,
+            self.imap_unordered(
                 functools.partial(_getattr, name="area"),
                 self,
             )
@@ -133,8 +114,7 @@ class CartogramFeatures:
         for feature in self:
             feature.area_value_ratio = area_value_ratio
         total_error = sum(
-            self.workers.imap_unordered(
-                # lambda x: x.sizeerror,
+            self.imap_unordered(
                 functools.partial(_getattr, name="sizeerror"),
                 self,
             )
@@ -148,8 +128,7 @@ class CartogramFeatures:
     @functools.cached_property
     def total_value(self):
         total_value = sum(
-            self.workers.imap(
-                # lambda x: x.value,
+            self.imap_unordered(
                 functools.partial(_getattr, name="value"),
                 self,
             )
@@ -166,7 +145,7 @@ class CartogramFeatures:
             and not self.feedback.isCanceled()
         ):
             reduction_factor = 1.0 / (average_error + 1)
-            transformed_vertices = self.workers.imap_unordered(
+            transformed_vertices = self.imap_unordered(
                 functools.partial(
                     CartogramFeatures.transformVertex,
                     features=list(self.features),
