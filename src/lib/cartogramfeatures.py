@@ -35,12 +35,13 @@ if "cache" not in dir(functools):
 class CartogramFeatures:
     """Handle a list of `CartogramFeature`."""
 
-    def __init__(self, feedback=lambda: QgsProcessingFeedback()):
+    def __init__(self, feedback=lambda: QgsProcessingFeedback(), source_layer=None):
         """Handle a list of `CartogramFeature`."""
         self._features = {}
         self.workers = multiprocessing.get_context("spawn").Pool()
         self.feedback = feedback
         self.feedback.canceled.connect(self.stop_workers)
+        self.source_layer = source_layer
 
     def __del__(self):
         """Take care of the worker pool upon unloading."""
@@ -52,7 +53,7 @@ class CartogramFeatures:
 
     @staticmethod
     def from_polygon_layer(layer, field_name, feedback=lambda: QgsProcessingFeedback()):
-        cartogram_features = CartogramFeatures(feedback)
+        cartogram_features = CartogramFeatures(feedback, source_layer=layer)
         crs = layer.sourceCrs().toProj()
         for feature in layer.getFeatures():
             feature_id = feature.id()
@@ -65,8 +66,14 @@ class CartogramFeatures:
             cartogram_features[feature_id] = cartogram_feature
         return cartogram_features
 
-    def copy_geometries_back_to_layer(self, layer):
-        # this MUST be the same layer as used for `from_polygon_layer`
+    def copy_geometries_back_to_polygon_layer(self):
+        layer = self.source_layer
+        if layer is None:
+            raise NotImplementedError(
+                "`CartogramFeatures.copy_geometries_back_to_polygon_layer()`"
+                "only works for CartogramFeatures that have been instantiated "
+                "via `CartogramFeatures.from_polygon_layer()`"
+            )
         layer.startEditing()
         for feature in self.features:
             layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
