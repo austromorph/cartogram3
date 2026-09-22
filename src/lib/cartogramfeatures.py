@@ -66,19 +66,6 @@ class CartogramFeatures:
             cartogram_features[feature_id] = cartogram_feature
         return cartogram_features
 
-    def copy_geometries_back_to_polygon_layer(self):
-        layer = self.source_layer
-        if layer is None:
-            raise NotImplementedError(
-                "`CartogramFeatures.copy_geometries_back_to_polygon_layer()`"
-                "only works for CartogramFeatures that have been instantiated "
-                "via `CartogramFeatures.from_polygon_layer()`"
-            )
-        layer.startEditing()
-        for feature in self.features:
-            layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
-        layer.commitChanges()
-
     def __setitem__(self, feature_id, cartogram_feature):
         self._features[feature_id] = cartogram_feature
 
@@ -214,6 +201,12 @@ class CartogramFeatures:
 
             iteration += 1
             average_error = self.average_error
+
+        if self.source_layer is not None:
+            self.source_layer.startEditing()
+            for feature in self.features:
+                self.source_layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
+            self.source_layer.commitChanges()
 
         return iteration, average_error
 
