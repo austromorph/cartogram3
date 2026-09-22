@@ -195,7 +195,6 @@ class CartogramProcessingAlgorithm(QgsProcessingAlgorithm):
         iterations, average_error = cartogram_features.transform(
             max_iterations, max_average_error
         )
-        cartogram_features.copy_geometries_back_to_polygon_layer()
 
         # We are sometimes left with slithers and polygons misshaped in other ways,
         # a zero-buffer around them works well
