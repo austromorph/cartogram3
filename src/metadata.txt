@@ -26,6 +26,7 @@ qgisMaximumVersion=4.99
 changelog=
     4.0.2 (2026-?-?):
         - refactored CartogramFeatures
+        - ported parallel processing to QgsTask
     4.0.1 (2026-06-10):
         - CI/CD pipeline
         - adapt linting to plugins.qgis.org rules

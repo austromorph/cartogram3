@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-"""Provide a drop-in replacement for multiprocessing.imap_unordered() using QgsTasks."""
+"""Provide a QgsTask-based drop-in replacement for
+multiprocessing.imap_unordered()."""
+
 
 import itertools
 
@@ -10,19 +12,25 @@ from qgis.core import (
     QgsTask,
 )
 
+__all__ = ["ParallelWorkerMixin"]
+
+
 TASK_DESCRIPTION = ""
 
 
 class QgsDummyParentTask(QgsTask):  # pylint: disable=too-few-public-methods
     """QgsTask cannot be instantiated directly."""
+    def run(self):
+        return True
 
 
-class QgsParallelWorker:
+class ParallelWorkerMixin:
     """Provide a drop-in replacement for multiprocessing.imap_unordered()."""
 
     def __init__(self):
         """Initialise a QgsParallelWorker."""
         self.task = None
+        self.results = []
 
     def cancel(self):
         """Cancel a running parallel task."""
@@ -31,30 +39,22 @@ class QgsParallelWorker:
         except AttributeError:
             pass
 
-    def imap_unordered(self, func, iterable, /, chunksize=1):
+    def imap_unordered(self, func, iterable, /, chunksize=0):
         """Run `func` for every item in `iterable`"""
         task_manager = QgsApplication.taskManager()
 
-        if chunksize > 1:
+        if chunksize > 0:
             chunks = itertools.batched(iterable, chunksize)
         else:
             chunks = [iterable]
 
-        results = []
-
         def _func(task, items):
             return_values = []
             for item in items:
-                if task.isCancelled():
+                if task.isCanceled():
                     break
                 return_values.append(func(item))
             return return_values
-
-        def _finished(exception, result):
-            if exception is not None:
-                print(exception)
-                raise exception
-            results.extend(result)
 
         self.task = task = QgsDummyParentTask(flags=QgsTask.CanCancel)
         for chunk in chunks:
@@ -63,7 +63,7 @@ class QgsParallelWorker:
                     TASK_DESCRIPTION,
                     _func,
                     chunk,
-                    on_finished=_finished,
+                    on_finished=self._finished,
                     flags=QgsTask.CanCancel,
                 ),
                 subTaskDependency=QgsTask.ParentDependsOnSubTask,
@@ -71,6 +71,14 @@ class QgsParallelWorker:
         task_manager.addTask(task)
 
         task.waitForFinished(timeout=0)
+        results = self.results
+
         self.task = None
+        self.results = []
 
         return results
+
+    def _finished(self, exception, result):
+        if exception is not None:
+            raise Exception(exception)
+        self.results.extend(result)

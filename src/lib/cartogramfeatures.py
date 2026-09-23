@@ -10,10 +10,10 @@ import multiprocessing
 from qgis.core import QgsGeometry, QgsProcessingFeedback
 
 from .cartogramfeature import CartogramFeature
-from .qgsparallelworker import QgsParallelWorker
+from .parallelworkermixin import ParallelWorkerMixin
 
 
-class CartogramFeatures(QgsParallelWorker):
+class CartogramFeatures(ParallelWorkerMixin):
     """Handle a list of `CartogramFeature`."""
 
     def __init__(self, feedback=lambda: QgsProcessingFeedback(), source_layer=None):
