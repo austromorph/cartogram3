@@ -1,5 +1,8 @@
 Change Log 
 ==========
+* __4.0.2__ (2026-09-23):
+    * refactored CartogramFeatures
+    * fixed path to python binary on MacOS
 * __4.0.1__ (2026-06-10):
     * CI/CD pipeline
     * adapt linting to plugins.qgis.org rules
