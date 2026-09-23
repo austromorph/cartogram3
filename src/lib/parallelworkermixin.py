@@ -7,7 +7,9 @@ multiprocessing.imap_unordered()."""
 import itertools
 
 from qgis.core import (
+    Qgis,
     QgsApplication,
+    QgsMessageLog,
     QgsTask,
 )
 
@@ -80,5 +82,9 @@ class ParallelWorkerMixin:
 
     def _finished(self, exception, result):
         if exception is not None:
-            raise Exception(exception)
+            QgsMessageLog.logMessage(
+                exception,
+                level=Qgis.MessageLevel.Critical,
+            )
+            raise exception
         self.results.extend(result)
