@@ -4,7 +4,6 @@
 """Provide a QgsTask-based drop-in replacement for
 multiprocessing.imap_unordered()."""
 
-
 import itertools
 
 from qgis.core import (
@@ -20,6 +19,7 @@ TASK_DESCRIPTION = ""
 
 class QgsDummyParentTask(QgsTask):  # pylint: disable=too-few-public-methods
     """QgsTask cannot be instantiated directly."""
+
     def run(self):
         return True
 
