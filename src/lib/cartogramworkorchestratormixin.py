@@ -60,7 +60,7 @@ class CartogramWorkOrchestratorMixIn:
         sample_layer.updateFields()
         sample_layer_data_provider.addFeatures(list(source_layer.getFeatures()))
 
-        named_style_path = self.plugin_dir / "data" / "Austria_PopulationByNUTS2.qml"
+        named_style_path = source_layer_path.with_suffix(".qml")
         sample_layer.loadNamedStyle(f"{named_style_path}")
 
         sample_layer.serverProperties().setTitle(
