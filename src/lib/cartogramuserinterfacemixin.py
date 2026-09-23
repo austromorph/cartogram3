@@ -4,7 +4,6 @@
 """Distort a polygon map so that its area represent a field value."""
 
 import functools
-import os.path
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt
@@ -204,10 +203,10 @@ class CartogramUserInterfaceMixIn:
         self.menu = self.tr("&Cartogram")
         self.dialog = CartogramDialog()
 
-        icon_path = os.path.join(self.plugin_dir, "img", "icon.png")
+        icon_path = self.plugin_dir / "img" / "icon.png"
 
         self.add_action(
-            icon_path,
+            f"{icon_path}",
             text=self.tr("Compute cartogram"),
             callback=self.show_dialog,
             parent=self.iface.mainWindow(),
@@ -226,15 +225,11 @@ class CartogramUserInterfaceMixIn:
 
     def init_translations(self):
         userLocale = QSettings().value("locale/userLocale")[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            "i18n",
-            "{:s}_{:s}.qm".format(self.PLUGIN_NAME, userLocale),
-        )
+        locale_path = self.plugin_dir / "i18n" / f"{self.PLUGIN_NAME}_{userLocale}.qm"
 
-        if os.path.exists(locale_path):
+        if locale_path.exists():
             self.translator = QTranslator()
-            self.translator.load(locale_path)
+            self.translator.load(f"{locale_path}")
             QCoreApplication.installTranslator(self.translator)
 
     _input_check_message_bar_item = None

@@ -3,7 +3,7 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-import os.path
+import pathlib
 
 from .lib import CartogramUserInterfaceMixIn, CartogramWorkOrchestratorMixIn
 
@@ -25,7 +25,7 @@ class Cartogram(CartogramUserInterfaceMixIn, CartogramWorkOrchestratorMixIn):
             application at run time.
         """
         self.iface = iface
-        self.plugin_dir = os.path.dirname(__file__)
+        self.plugin_dir = pathlib.Path(__file__).parent
         super(Cartogram, self).__init__()
 
     def unload(self):

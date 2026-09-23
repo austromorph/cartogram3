@@ -6,7 +6,6 @@
 import functools
 import math
 import multiprocessing
-import os.path
 import pathlib
 import platform
 import sys
@@ -16,10 +15,10 @@ from qgis.core import QgsGeometry, QgsProcessingFeedback
 from .cartogramfeature import CartogramFeature
 
 if platform.system() == "Windows":
-    sys.argv = [os.path.abspath(__file__)]
-    multiprocessing.set_executable(os.path.join(sys.exec_prefix, "pythonw.exe"))
+    sys.argv = [pathlib.Path(__file__).absolute()]
+    multiprocessing.set_executable(pathlib.Path(sys.exec_prefix) / "pythonw.exe")
 elif platform.system() == "Darwin":
-    sys.argv = [os.path.abspath(__file__)]
+    sys.argv = [pathlib.Path(__file__).absolute()]
     multiprocessing.set_executable(pathlib.Path(sys.executable).parent / "python")
 
 
@@ -206,7 +205,9 @@ class CartogramFeatures:
         if self.source_layer is not None:
             self.source_layer.startEditing()
             for feature in self.features:
-                self.source_layer.changeGeometry(feature.id, QgsGeometry().fromWkt(feature.wkt))
+                self.source_layer.changeGeometry(
+                    feature.id, QgsGeometry().fromWkt(feature.wkt)
+                )
             self.source_layer.commitChanges()
 
         return iteration, average_error

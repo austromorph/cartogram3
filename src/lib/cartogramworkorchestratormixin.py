@@ -3,8 +3,6 @@
 
 """Distort a polygon map so that its area represent a field value."""
 
-import os.path
-
 from qgis.core import (
     QgsApplication,
     QgsProcessingAlgRunnerTask,
@@ -43,14 +41,8 @@ class CartogramWorkOrchestratorMixIn:
         QgsApplication.processingRegistry().removeProvider(self.provider)
 
     def sample_layer(self):
-        source_layer = QgsVectorLayer(
-            os.path.join(
-                self.plugin_dir,
-                "data",
-                "Austria_PopulationByNUTS2.gml",
-            ),
-            "",
-        )
+        source_layer_path = self.plugin_dir / "data" / "Austria_PopulationByNUTS2.gml"
+        source_layer = QgsVectorLayer(f"{source_layer_path}", "")
 
         # (empty) memory layer
         sample_layer = QgsVectorLayer(
@@ -68,9 +60,8 @@ class CartogramWorkOrchestratorMixIn:
         sample_layer.updateFields()
         sample_layer_data_provider.addFeatures(list(source_layer.getFeatures()))
 
-        sample_layer.loadNamedStyle(
-            os.path.join(self.plugin_dir, "data", "Austria_PopulationByNUTS2.qml")
-        )
+        named_style_path = self.plugin_dir / "data" / "Austria_PopulationByNUTS2.qml"
+        sample_layer.loadNamedStyle(f"{named_style_path}")
 
         sample_layer.serverProperties().setTitle(
             "Austria: Population by NUTS2 regions, 1 Jan 2017"
