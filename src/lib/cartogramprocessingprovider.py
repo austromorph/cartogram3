@@ -3,7 +3,7 @@
 
 """Provide a cartogram algorithm to the processing toolbox."""
 
-import os.path
+import pathlib
 
 from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
@@ -24,4 +24,5 @@ class CartogramProcessingProvider(QgsProcessingProvider):
         return self.tr("Cartogram")
 
     def icon(self):
-        return QIcon(os.path.join(os.path.dirname(__file__), "..", "img", "icon.png"))
+        icon_path = pathlib.Path(__file__).parent.parent / "img" / "icon.png"
+        return QIcon(f"{icon_path}")
